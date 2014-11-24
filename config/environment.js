@@ -2,6 +2,11 @@
 
 module.exports = function(environment) {
   var ENV = {
+    contentSecurityPolicy: {
+        'default-src': "'self'",
+	'connect-src': "'self' http://localhost:8081",
+	'style-src': "'self' 'unsafe-inline'"
+    },
     modulePrefix: 'rapido',
     environment: environment,
     baseURL: '/',

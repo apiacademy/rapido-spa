@@ -1,3 +1,43 @@
-<h2 id='title'>Welcome to Ember.js</h2>
+<section id="topnav">
 
+<!-- Top Nav -->
+{{outlet topnavbar}}
+<nav class="navbar navbar-default" role="navigation">
+    <div class="container-fluid">
+    
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+        </button>
+    <a class="navbar-brand" href="#">Rápido!</a>
+    </div>    
+
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <div class="collapse navbar-collapse">
+        {{outlet menubar}}        
+        {{#if isAuthenticated}}                                
+        <button {{action 'signOut'}} class="btn btn-warning navbar-btn navbar-right" type="button">Signout</button>
+        <p class="navbar-text navbar-right">{{id}}</p>        
+        {{else}}
+        <form class="login-form navbar-form navbar-right" {{action 'signIn' on='submit'}}>
+        <div class="form-group">
+            {{input type="text" class="login-name form-control" value=login_username placeholder="username"}}  {{input type="password" value=login_password class="login-password form-control" placeholder="password"}}
+        </div>
+        <button type="submit" class="login-submit btn btn-default">Submit</button>
+        </form>    
+        {{/if}}      
+    </div><!-- /.navbar-collapse -->
+    </div><!-- /.container-fluid -->
+</nav>    
+</section>
 {{outlet}}
+    
+<div id="type-ahead" class="type-ahead" style="padding: .05em .05em; ">    
+    {{#each suggestion in typeAheadSuggestions}}
+    <div class="type-ahead-suggestion" style="white-space: nowrap; cursor: pointer;" {{action "suggestionClicked" suggestion on="click"}}>{{suggestion}}</div>
+    {{/each}}
+</div>

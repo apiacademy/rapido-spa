@@ -6,6 +6,38 @@ var Router = Ember.Router.extend({
 });
 
 Router.map(function() {
+	
+	this.resource('projects', function() {});
+
+	this.resource('project', { path: '/:project_id'}, function() {       
+		this.resource('start');
+		this.route('export', {path: '/export'});
+
+		this.resource('resources', function() {
+			//Removing nesting because the templates will not be nested.
+			//this.resource('resource', { path: '/:resource_id' });
+		});
+		this.resource('resource', { path: '/resources/:resource_id' }, function() {
+			this.resource('response', { path: '/:response_name' });
+		});
+		this.resource('alps', function() {
+			this.route('create', {path: '/create'});
+			this.resource('profile', { path: '/:alps_profile_id' }, function() {
+				this.route('edit', {path: '/edit'});
+			});
+		});
+		this.resource('maps', {path: '/maps'}, function() {
+			this.resource('map', {path: '/:map_id'});
+		});
+
+		this.route('export', {path: '/export'});		
+		this.route('run', {path: '/engine'});
+		this.route('vocabulary', {path: '/vocab'});
+		this.route('editor', {path: '/explore'});
+	});
+
+
+	
 });
 
 export default Router;

@@ -1,8 +1,11 @@
 {
   "predef": [
+    "$",
+    "Promise",
+    "d3",
+    "tree",
     "document",
-    "window",
-    "-Promise"
+    "window"    
   ],
   "browser" : true,
   "boss" : true,
@@ -28,5 +31,5 @@
   "white": false,
   "eqnull": true,
   "esnext": true,
-  "unused": true
+  "unused": "vars"  
 }

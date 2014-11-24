@@ -17,4 +17,21 @@ var app = new EmberApp();
 // please specify an object with the list of modules as keys
 // along with the exports of each module as its value.
 
+app.import('bower_components/bootstrap/dist/css/bootstrap.css');
+app.import('bower_components/bootstrap/dist/css/bootstrap.css.map');
+app.import('bower_components/bootstrap/dist/js/bootstrap.min.js');
+app.import('bower_components/d3/d3.min.js');
+app.import('bower_components/typeahead.js/dist/typeahead.bundle.min.js');
+app.import('bower_components/ace-builds/src-noconflict/ace.js');
+app.import('bower_components/ace-builds/src-min-noconflict/mode-json.js');
+app.import('bower_components/ace-builds/src-min-noconflict/worker-json.js');
+app.import('bower_components/ace-builds/src-min-noconflict/mode-xml.js');
+app.import('bower_components/ace-builds/src-min-noconflict/mode-markdown.js');
+app.import('bower_components/ace-builds/src-min-noconflict/mode-yaml.js');
+app.import('bower_components/ace-builds/src-min-noconflict/theme-cobalt.js');
+
+app.import('vendor/rapido/tree.js');
+app.import('vendor/rapido/typeahead.js');
+
 module.exports = app.toTree();
+
