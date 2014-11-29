@@ -5,7 +5,8 @@
     "d3",
     "tree",
     "document",
-    "window"    
+    "window",
+    "ace"
   ],
   "browser" : true,
   "boss" : true,

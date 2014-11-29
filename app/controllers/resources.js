@@ -68,7 +68,7 @@ export default Ember.ArrayController.extend({
 		},
 		saveResource: function() {
 			console.log('saveResource');
-			//var projectId = this.get('projectController').model.id;  
+			var projectId = this.get('projectController').model.id;  
 			
 			// Find the parent resource			
 			var parent = this.get('newResourceParent');									
@@ -90,21 +90,18 @@ export default Ember.ArrayController.extend({
 				responses.push({name: "DELETE", body: ""});
 			}
 
-			console.log('this.store.createRecord');
-
 			var newResource = this.store.createRecord('resource', {
 				name: this.get('newResourceName'),                
-                description: this.get('newResourceDescription'),                
+				description: this.get('newResourceDescription'),                
 				responses: responses,
 				url: this.get('newResourceUri'),
 				children: [],
 				parent: parent,
-				methods: methods
+				methods: methods,
+				project: projectId
 			});
 			newResource.save();
 
-			console.log(newResource);
-			
 			/*
 			// Create new response state
 			var newResource = App.CRUDResourceModel.create({

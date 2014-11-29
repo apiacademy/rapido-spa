@@ -5,15 +5,16 @@ html, body {
 .node-title { 
     stroke-width: 2;
     stroke: black;
-    fill: #FAECC3;  
-    fill-opacity: 0.9;
+    /*fill: #FAECC3;*/
+    fill: #0D47A1;
+    fill-opacity: 1.0;
     cursor: pointer;
 
 }
 
 .node-title-text {
-	font: 18px sans-serif;
-	fill: black;
+	font: 12px sans-serif;
+	fill: white;
 	stroke-width: 1;
 	fill-opacity: 1.0;
 }	
@@ -24,6 +25,59 @@ html, body {
     fill: #FFFFFF;      
     fill-opacity: 1.0;
     cursor: pointer;
+}
+
+.node-orbit {
+    fill: #E3F2FD;
+    fill-opacity: 0.2;
+    stroke-width:2;
+    stroke:black;
+    stroke-dasharray: 5,5;
+    stroke-opacity: 0.4;
+}
+
+.node-orbit.selected {
+    fill-opacity: 1.0;
+}
+
+.link {
+  stroke:gray;
+  stroke-width: 3px;
+  stroke-opacity:1;
+    cursor: pointer;
+}
+
+.link.incoming {
+  stroke: red;
+  stroke-width: 6px;
+  stroke-dasharray: 5,5;
+}
+
+.link.outgoing {
+    stroke: blue;
+    stroke-width: 6px;
+}
+
+.transition {
+    fill: #448AFF;
+}
+
+.transition-text {
+    fill: black;
+}
+
+/* Media Type plugin styles */
+.create-transition-wizard {
+    border-bottom-style: solid;
+    border-color: #0D47A1;
+    background:  #E3F2FD; 
+    position: absolute; 
+    width: 100%;
+    opacity: 0.9;
+}
+
+.create-transition-wizard span {
+    padding: 0 5em 0 5em;
 }
 
 /* tree designer styles */
@@ -79,4 +133,54 @@ html, body {
 .tree-node-title {	
 	font: 18px sans-serif;
 }
+
+/* Vocabulary Styles */
+#vocab-list {
+	margin: 0 0 0.5em 1.0em;
+	padding: 1.0em 0 0 0;
+	list-style: none;
+}
+
+#vocab-list li {
+	position: relative;
+	font-size: 22px;
+	border-bottom: 1px dotted #ccc;
+}
+
+#new-vocab {
+	position: relative;
+	margin: 0 0 0.5em 0;
+	width: 20.0em;
+	font-size: 24px;
+	font-family: inherit;
+	line-height: 1.4em;
+	border: 0;
+	outline: none;
+	color: inherit;
+	padding: 6px;
+	
+	border: 1px solid #999;
+	box-shadow: inset 0 -1px 5px 0 rgba(0, 0, 0, 0.2);
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-ms-box-sizing: border-box;
+	-o-box-sizing: border-box;
+	box-sizing: border-box;
+	-webkit-font-smoothing: antialiased;
+	-moz-font-smoothing: antialiased;
+	-ms-font-smoothing: antialiased;
+	-o-font-smoothing: antialiased;
+	font-smoothing: antialiased;
+}
+
+/** Wizard Pages **/
+.wizard-header {
+}
+
+.navbar-default { 
+    background-color: rgba(0,0,0,0);
+    border-color: rgba(0,0,0,0);
+}
+
+
 

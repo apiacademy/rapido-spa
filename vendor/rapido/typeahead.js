@@ -49,6 +49,9 @@ function createTypeAheadBox(left, top) {
     // Let our focus listener know that we are temporarily taking focus away
     //expectedFocusChange = true;
 
+    console.log(left);
+    console.log(top);
+
     $(typeAheadDivId).dialog({
         position: [left, top],
         closeOnEscape: true,

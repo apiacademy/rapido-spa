@@ -13,4 +13,7 @@ var App = Ember.Application.extend({
 
 loadInitializers(App, config.modulePrefix);
 
+// Initialize ACE editor with values for new directories
+ace.config.set('workerPath', '/assets/workers');
+
 export default App;

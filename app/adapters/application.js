@@ -1,6 +1,9 @@
 import DS from "ember-data";
+import ENV from "../config/environment";
 
-var host = 'http://localhost:8081';
+var host = ENV.backend;
+var url;
+var record;
 
 /**
  * Creates objects on the server
@@ -8,10 +11,6 @@ var host = 'http://localhost:8081';
  * @url {string} full resource path
  */
 function createObject(token, url, data, callback) {
-console.log('createObject called');
-console.log(data);
-console.log(JSON.stringify(data));
-    
     var createAJAX = $.ajax({
         url: url,
         type: 'POST',                    
@@ -37,36 +36,83 @@ console.log(JSON.stringify(data));
  * Retrieves objects from the server
  * @token {string} ???
  * @url {string} full resource path
- * @dataparser {function} parser for the returned object
  * @return {Promise} promise
  */
-function getObjects(token, url, dataParser, callback) {
+
+function getObjects(token, url, callback) {
     var getAJAX = $.ajax({
         url: url,
         type: 'GET',                    
         beforeSend: function( request ) {
-            //var bearerAuthString = 'Bearer ' + token;                    
-            //request.setRequestHeader("Authorization", bearerAuthString);
+            var bearerAuthString = 'Bearer ' + token;                    
+            request.setRequestHeader("Authorization", bearerAuthString);
         }
     });
                 
     getAJAX.done( function( data, textStatus, jqXHR ) {                            
-        if(!dataParser) {        	
         	callback(null,data);
-        }else {
-        	dataParser(data).then(function(parsedData) {
-	            callback(null, parsedData);
-	        }, function(error) {
-	            callback(error);
-	        });
-        }        
     });
     
     getAJAX.fail( function( data, textStatus, jqXHR ) {
-        //console.log('fail');
         callback(textStatus, null);
     });
 }
+
+/**
+ * Updates an object on the server
+ * @token {string} ???
+ * @url {string} full resource path
+ */
+function updateObject(token, url, data, callback) {
+    var createAJAX = $.ajax({
+        url: url,
+        type: 'PUT',                    
+        contentType : 'application/json',
+        data: JSON.stringify(data),
+        beforeSend: function( request ) {
+            var bearerAuthString = 'Bearer ' + token;
+            request.setRequestHeader("Authorization", bearerAuthString);
+        }
+    });
+                
+    createAJAX.done( function( response, textStatus, jqXHR ) {                    
+        // On success, create a new model instance and return it
+        callback(null, response);
+    });
+    
+    createAJAX.fail( function( response, textStatus, jqXHR ) {
+        callback(textStatus);
+    });
+}
+
+/**
+ * Deletes objects from the server
+ * @token {string} ???
+ * @url {string} full resource path
+ *
+ * @return {Promise} promise
+ */
+
+function deleteObject(token, url, callback) {    
+    var getAJAX = $.ajax({
+        url: url,
+        type: 'DELETE',                    
+        beforeSend: function( request ) {
+            var bearerAuthString = 'Bearer ' + token;                    
+            request.setRequestHeader("Authorization", bearerAuthString);
+        }
+    });
+                
+    getAJAX.done( function( data, textStatus, jqXHR ) {                                 
+        callback(null);
+    });
+    
+    getAJAX.fail( function( data, textStatus, jqXHR ) {
+        console.log('fail');
+        callback(textStatus);
+    });
+}
+
 
 /* The custom Ember-Data Adapter.
  * Connects with my custom backend.
@@ -77,22 +123,23 @@ export default DS.Adapter.extend({
 		console.log(type);
 		console.log(id);
 		console.log(record);
-		return {};
+		return new Promise(function(resolve,reject) { reject('not implemented.'); });
   	},
 	findAll: function(store, type, sinceToken) {
 		//console.log(type.typeKey);
 		//console.log(sinceToken);
 
-		var url = '';
-		if( type.typeKey === 'project' ) {
-			url = host + '/projects';
-		}
-
-		var token = '';
-		var dataParser = null;
-
+		var token = localStorage.token;
+		url = host;
+	
 		return new Promise(function(resolve,reject) {
-			getObjects(token, url, dataParser, function(error, result) {
+			if( type.typeKey === 'project' ) {
+				url = url + '/projects';
+			}else {
+				reject('findAll is not supported for this record type.');
+			}
+
+			getObjects(token, url, function(error, result) {
 				if( error === null ) { resolve(result); } 
 				else { reject(error); }
 			});
@@ -100,63 +147,197 @@ export default DS.Adapter.extend({
 		
 	},
 	findQuery: function(store, type, query) {		
-		var url = host;
+		var token = localStorage.token;
+		url = host;
 
 		if( type.typeKey === 'resource') {
 			var projectId = query.project;
 			url = url + '/projects/' + projectId + '/resources';
+		} else if ( type.typeKey === 'state' ) {
+			var projectId = query.project;
+			url = url + '/projects/' + projectId + '/states';
+
+			/** Mock the response for now.  Implement in back once we work out the details. **/
+            /**
+			return new Promise(function(resolve,reject) {
+                
+				var _state = [
+					{
+                        name: "state1",
+                        _id: "asdf1",
+                        description: "state description",
+                        transitions: [
+                           {name: 'transition1', methods: ['GET'], target: 'asdf2'},
+                           {name: 't2', methods: ['GET'], target: '3'},
+                           {name: 't3', methods: ['GET'], target: '4'}
+                        ],
+                        responses: {'primary': '{ \"collection\": {}}'}
+                    },
+					{
+                        name: "state2",
+                        _id: "asdf2",
+                        description: "another description",
+                        transitions: [],
+                        responses: {'primary': '{ \"collection\": {}}'}
+                    },
+                    {
+                        name: "state3",
+                        _id: "3",
+                        description: "third",
+                        transitions: [],
+                        responses: {'primary': ''}
+                    },
+                    {
+                        name: "state 4",
+                        _id: "4",
+                        description: "third",
+                        transitions: [],
+                        responses: {'primary': ''}
+                    }
+				];
+				console.log(_state);
+				resolve(_state);
+			});**/
 		} else {
-			console.error('unknown record type');
+			console.error('findQuery is not supported for this record type.');
 		}
 
-		var token = '';
-		var dataParser = null;
 
 		return new Promise(function(resolve,reject) {
-			getObjects(token, url, dataParser, function(error, result) {
+			getObjects(token, url, function(error, result) {
 				if( error === null ) { resolve(result); } 
 				else { reject(error); }
 			});
 		});
 	},
 	createRecord: function(store, type, record) {
-		console.log('create');
+		console.log('**** createRecord ****');
+		var token = localStorage.token;
+		url = host;
+		//TODO: Check if token is valid, reject if it is not there.
 
-		var url = host;
+		var _record;
 
-		if( type.typeKey === 'project' ) {
-console.log(localStorage.token);
-			var token = localStorage.token;
-			var project = {		        
-		        	name: record.get('name'),
-		        	description: record.get('description'),
-		        	hostname: '',
-		        	contentType: record.get('contentType'),
-				projectType: record.get('projectType')
-	    		};
-	    		console.log(project);
-			url = url + '/projects';
-			console.log('calling ' + url);
-return new Promise(function(resolve,reject) {
-			createObject(token, url, project, function(error, response) {
-				if( error === null ) { resolve(response[0]); } 
+		return new Promise(function(resolve,reject) {
+
+			if( type.typeKey === 'project' ) {
+					_record = {		        
+						name: record.get('name'),
+						description: record.get('description'),
+						hostname: '',
+						contentType: record.get('contentType'),
+						projectType: record.get('projectType')
+					};
+					url = url + '/projects';
+			} else if( type.typeKey === 'resource' ) {			
+				var projectId = record.get('project');
+				if( !record.get('project') ) { reject('A parent project identifier property must be present on records of type \'resource\''); }
+				_record  = {
+					resource:  {
+						name: record.get('name'),
+						description: record.get('description'),
+						responses: record.get('responses'),
+						url: record.get('url'),
+						children: record.get('children'),
+						parent: record.get('parentId'),
+						methods: record.get('methods')
+					}
+				};
+				url = url + '/projects/' + projectId + '/resources';
+			} else if( type.typeKey === 'state' ) {
+                var projectId = record.get('project');
+				if( !record.get('project') ) { reject('A parent project identifier property must be present on records of type \'resource\''); }
+                _record = {
+                    state: {
+                        name: record.get('name'),
+                        description: record.get('description'),
+                        responses: record.get('responses'),
+                        transitions: record.get('transitions')
+                    }
+                };
+                url = url + '/projects/' + projectId + '/states';
+            } else {
+				reject('unknown record type');
+			}
+
+			createObject(token, url, _record, function(error, response) {
+				if( !error ) { resolve(response[0]); }
 				else { reject(error); }
 			});
 		});
 
-		} else if( type.typeKey === 'resource' ) {			
-		}
 	},
 	updateRecord: function(store, type, record) {
-		console.log('update');
-		console.log(store);
-		console.log(type);
-		console.log(record);
+		var token = localStorage.token;
+		url = host;
+		var _record;
+
+		return new Promise(function(resolve,reject) {
+            if( type.typeKey === 'project' ) {
+                _record = {
+                    simpleVocabulary: record.get('simpleVocabulary')
+                }
+                url = url + '/projects/' + record.get('id');
+            } else if( type.typeKey === 'resource' ) {
+				var projectId = record.get('project');
+				if( !projectId ) { reject('A parent project identifier property must be present for records of type \'resource\''); }
+				_record  = {
+					resource:  {
+						name: record.get('name'),
+						description: record.get('description'),
+						responses: record.get('responses'),
+						url: record.get('url'),
+						children: record.get('children'),
+						parent: record.get('parentId'),
+						methods: record.get('methods')
+					}
+				};
+				url = url + '/projects/' + projectId + '/resources/' + record.get('id');
+				
+			} else if( type.typeKey === 'state' ) {
+                var projectId = record.get('project');
+				if( !projectId ) { reject('A parent project identifier property must be present for records of type \'state\''); }
+                _record = {
+                    state: {
+						name: record.get('name'),
+						description: record.get('description'),
+						responses: record.get('responses'),
+                        transitions: record.get('transitions'),
+                        x: record.get('x'),
+                        y: record.get('y')
+                    }
+                };
+                url = url + '/projects/' + projectId + '/states/' + record.get('id');
+            } else {
+				reject('this record type cannot be updated.');
+			}
+
+            console.log(url);
+			updateObject(token ,url, _record, function(error, response) {
+				if( !error ) { resolve(response[0]); }
+				else { reject(error); }
+			});
+		});
 	},
 	deleteRecord: function(store, type, record) {
-		console.log('delete');
-		console.log(store);
-		console.log(type);
-		console.log(record);
+		var token = localStorage.token;
+		url = host;
+
+		return new Promise(function(resolve,reject) {
+			if( type.typeKey === 'project' ) {
+				url = url + '/projects/' + record.id;
+			} else if( type.typeKey === 'resource' ) {
+				var projectId = record.get('project');
+				if( !projectId ) { reject('A parent project identifier property must be present on records of type \'resource\''); }
+				url = url + '/projects/' + projectId + '/resources/' + record.get('id');
+			} else {
+				reject('unknown record type');
+			}
+
+			deleteObject(token, url, function(error) {
+				if( !error ) { resolve(); }
+				else { reject(error); }
+			});
+		});
 	}
 });

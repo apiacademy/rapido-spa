@@ -30,6 +30,8 @@ module.exports = function(environment) {
     // ENV.APP.LOG_TRANSITIONS = true;
     // ENV.APP.LOG_TRANSITIONS_INTERNAL = true;
     ENV.APP.LOG_VIEW_LOOKUPS = true;
+
+    ENV.backend = 'http://localhost:8081'
   }
 
   if (environment === 'test') {
@@ -42,10 +44,11 @@ module.exports = function(environment) {
     ENV.APP.LOG_VIEW_LOOKUPS = false;
 
     ENV.APP.rootElement = '#ember-testing';
+    ENV.backend = 'http://localhost:8081'
   }
 
   if (environment === 'production') {
-
+      ENV.backend = 'http://rapidodesigner.com';
   }
 
   return ENV;

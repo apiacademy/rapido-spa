@@ -1,5 +1,4 @@
 <section id="topnav">
-
 <!-- Top Nav -->
 {{outlet topnavbar}}
 <nav class="navbar navbar-default" role="navigation">
@@ -19,8 +18,23 @@
     <!-- Collect the nav links, forms, and other content for toggling -->
     <div class="collapse navbar-collapse">
         {{outlet menubar}}        
-        {{#if isAuthenticated}}                                
+        {{#if isAuthenticated}}
+        <div class="navbar-right">
+            <div class="btn-group navbar-btn">
+                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-label="Right Align">
+                  <span class="glyphicon glyphicon-user" aria-hidden="true"></span>
+                </button>
+                <ul class="dropdown-menu" role="menu">
+                    <li><a {{action 'signOut'}} href="#">Sign Out</a></li>
+                    <li class="divider"></li>
+                    <li><a {{action 'manage'}} href="#">Manage Account</a></li>
+                </ul>
+            </div>
+            <div><small class="align-right">{{username}}</small></div>
+        </div>
+        <!--
         <button {{action 'signOut'}} class="btn btn-warning navbar-btn navbar-right" type="button">Signout</button>
+        -->
         <p class="navbar-text navbar-right">{{id}}</p>        
         {{else}}
         <form class="login-form navbar-form navbar-right" {{action 'signIn' on='submit'}}>
@@ -34,7 +48,26 @@
     </div><!-- /.container-fluid -->
 </nav>    
 </section>
+{{#if isAuthenticated}}
 {{outlet}}
+{{else}}
+<!-- Begin MailChimp Signup Form -->
+<form role="form">
+  <div class="form-group">
+      <h3>Sign up for early access</h3>
+    {{input class='form-control' value=email placeholder='Enter email address'}}
+    {{input class='form-control' value=firstName placeholder='First Name'}}
+    {{input class='form-control' value=lastName placeholder='Last Name'}}
+  </div>
+  <button {{action 'register'}} type="submit" class="btn btn-default">Submit</button>
+</form>
+    </div>
+    <small class="text-right">
+        username.
+    </small>
+<!--End mc_embed_signup-->
+{{/if}}
+
     
 <div id="type-ahead" class="type-ahead" style="padding: .05em .05em; ">    
     {{#each suggestion in typeAheadSuggestions}}

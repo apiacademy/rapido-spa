@@ -2,9 +2,9 @@ import Ember from "ember";
 
 export default Ember.Route.extend({
 	model: function() {
-		// Try to get the user model from a cookie.  The controller will use this to determine
-    	// if the user is authenticated.                  
-    	//return Backend.getUser();				
+        //TODO: CHeck if user is authenticated.
+
+        //TODO: decide what we should be returning as a model.
 		return this.store.find('project');
 	}
 });

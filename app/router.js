@@ -17,7 +17,18 @@ Router.map(function() {
 			//Removing nesting because the templates will not be nested.
 			//this.resource('resource', { path: '/:resource_id' });
 		});
-		this.resource('resource', { path: '/resources/:resource_id' }, function() {
+		this.resource('resources-editor', function() {
+			this.resource('resource', { path: '/:resource_id' });
+		}); 
+		this.resource('states', function() {
+            this.resource('state', { path: '/:state_id' }, function() {
+                this.route('create-cj-transition', {path: '/cj-create'});
+            });
+		});
+        this.resource('states-editor', function() {
+            this.resource('state-editor', { path: '/:state_id' } );
+        });
+		this.resource('__resource', { path: '/resources/:resource_id' }, function() {
 			this.resource('response', { path: '/:response_name' });
 		});
 		this.resource('alps', function() {

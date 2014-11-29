@@ -1,0 +1,110 @@
+<div class="row">
+	<div class="col-md-2">
+		<div>
+			<form>
+				{{#if isDirty}}
+				<div class="btn-group">
+				<button class="btn btn-primary" type="button" {{action 'saveResponse'}}>Save</button>
+				</div>
+				<div class="btn-group">
+				<button class="btn btn-warning" type="button" {{action 'cancelEdit'}}>Cancel</button>				
+				</div>				
+				{{else}}
+				<button class="btn btn-primary disabled" type="button" {{action 'saveResponse'}}>Save</button>
+				<button class="btn btn-warning disabled" type="button" {{action 'cancelEdit'}}>Cancel</button>				
+				{{/if}}				
+				<div class="form-group">													
+					<form>
+						<div class="form-group">
+						<h6>Name</h6>
+						{{input class="form-control input-sm" value=name}}
+						</div>
+						<div class="form-group">
+						<h6>URL</h6>
+						{{input class="form-control input-sm" value=url}}
+						</div>
+						<div class="form-group">
+						<h6>Description</h6>
+						{{input class="form-control input-sm" value=description}}
+						</div>
+						<div class="form-group">
+						<h6>Methods</h6>							
+						<fieldset>    								
+							<label class="checkbox-inline">
+								{{input type="checkbox" name="GET" checked=isGETEnabled}} GET  							
+							</label>
+							<label class="checkbox-inline">
+								{{input type="checkbox" name="PUT" checked=isPUTEnabled}} PUT  									
+							</label>
+							<label class="checkbox-inline">
+								{{input type="checkbox" name="PUT" checked=isPATCHEnabled}} PATCH
+							</label>
+							<label class="checkbox-inline">
+								{{input type="checkbox" name="POST" checked=isPOSTEnabled}} POST			
+							</label>
+							<label class="checkbox-inline">
+								{{input type="checkbox" name="DELETE" checked=isDELETEEnabled}} DELETE 
+							</label>							
+						</fieldset>
+						</div>						
+						<table class="table table-striped small">
+							<thead>
+								<tr><th>Query Parameters</th></tr>
+							</thead>
+							<tbody>
+								<tr><td>param1</td><td>edit</td></tr>
+								<tr><td>param2</td><td>edit</td></tr>
+								<tr><td>param3</td><td>edit</td></tr>
+							</tbody>							
+						</table>
+						{{input type="button" class="btn btn-primary" value="add"}} 
+					</form>
+				</div>
+			</form>
+		</div>
+	</div>
+	<div class="col-md-9">
+	<div>	
+		<div class="row">
+			<div class="col-md-12">
+				<div class="form-group">													
+					    <div class="form-inline">							
+							{{view Ember.Select 
+								class="form-control" 
+								content=responseStates 
+								style="max-width: 10.0em"							
+								value=activeResponseState}}							  
+						</div>					
+					</div>
+								
+				<div id="editor">
+					{{ace-editor 
+						text=responseBody 
+						mode=aceMode 
+						typeAheadSuggestions=suggestions 
+						typeAheadAction="setTypeAheadList"  
+						onChangeAction="responseUpdated"  
+						suggestionClicked=suggestion}}
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+	<div class="col-md-1">		
+		<div class="panel panel-default">
+  <div class="panel-heading small"><h6>templates</h6></div>
+  <div class="panel-body">
+    <p>
+			<button type="button" class="btn btn-default btn-sm"><span class="glyphicon glyphicon-plus"></span></button>
+		</p>
+		<p><br/></p>
+		<p>
+			<button type="button" class="btn btn-default btn-xs">default</button>
+		</p>
+		<p>
+			<button type="button" class="btn btn-default btn-xs">error</button>
+		</p>
+  </div>
+</div>			
+	</div>
+</div>

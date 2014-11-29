@@ -1,0 +1,34 @@
+<div class="row">
+    <div class="col-md-11"><h2>{{model.name}}</h2><p>{{model.description}}</p></div>
+    <div class="col-md-1">
+        <button type="button" class="btn btn-primary">Cancel</button>
+        <button type="button" class="btn btn-primary">Save</button>
+    </div>
+</div>
+<div>{{#each suggestions}}{{this.id}}{{/each}}</div>
+<div class="row">   
+    <div class="col-md-10">
+        <div class="row">
+            <div class="col-md-12" style="background-color: #157C2A">
+                <span>Collection/json</span><span>Name: Valid.</span>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12" id="editor">
+        {{ace-editor 
+						text=responseBody 
+						mode=aceMode 
+						typeAheadSuggestions=suggestions 
+                        nodeList=stateNames
+						typeAheadAction="setTypeAheadList"  
+						onChangeAction="responseUpdated"  
+						suggestionClicked=suggestion}}
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2">
+       Transitions and other properties. 
+       ideas: show buttons for mediat type wizards (e.g. CJ-data editor), show nodes that link here so that user can navigate around.
+    </div>
+</div>
+        
