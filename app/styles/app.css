@@ -81,11 +81,48 @@ html, body {
 }
 
 /* tree designer styles */
+
+.tree-node {
+  font: 10px sans-serif;
+}
+
 .tree-link {
   fill: none;
   stroke: #ccc;
   stroke-width: 3.5px;
 }
+
+
+.tree-node-name {
+    fill: #FAECC3;
+    stroke: black;
+    stroke-width: 2;
+}
+
+.dynamic {
+    stroke-width: 3;
+    stroke-dasharray: 10 5;
+}
+
+.tree-node-name-text {
+    fill: black;
+    stroke: black;
+	font: 18px sans-serif;
+}
+
+.tree-node-method { 
+    stroke-width: 2;
+    stroke: black;
+    fill-opacity: 0.8;
+}
+
+.tree-node-method-text {     
+	stroke-width: 1;
+	fill: white;
+    font: 10px sans-serif;
+}
+
+
 
 .tree-node circle {
   fill: #fff;
@@ -100,22 +137,6 @@ html, body {
 	stroke: gray;
 }
 
-
-.tree-node {
-  font: 10px sans-serif;
-}
-
-.tree-node-method { 
-    stroke-width: 2;
-    stroke: black;
-    fill-opacity: 0.8;
-}
-
-.tree-node-method-text {     
-	stroke-width: 1;
-	fill: white;
-}
-
 .GET {
 	fill: #0A52A8;      	
 }
@@ -127,11 +148,6 @@ html, body {
 }
 .DELETE {
 	fill: #930C16;
-}
-
-
-.tree-node-title {	
-	font: 18px sans-serif;
 }
 
 /* Vocabulary Styles */
@@ -182,5 +198,45 @@ html, body {
     border-color: rgba(0,0,0,0);
 }
 
+/** Design Maps **/
+
+.map-steps {
+	background:#C7CFFC;
+	width:20.0em;
+	height:15.0em;
+	text-align:left;
+	vertical-align:top;
+	padding:1em 1.5em 1em 1.5em;
+	margin-right:1.5em;
+	margin-bottom:0.8em;
+	font-family: "Lucida Bright", Georgia, serif;	
+}
+
+.map-questions {
+	background:#FCF4C7;
+}
+
+.map-comments {
+	background:#D5E8CF;
+}
+
+.map-ideas {
+	background:#FACDCD;
+}
+
+
+/* Hypermedia css */
+/* I may split this out into specific media type css files */
+.cj-link { 
+    fill: blue;
+}
+
+.cj-query { 
+    fill: purple;
+}
+
+.cj-item { 
+    fill: green;
+}
 
 

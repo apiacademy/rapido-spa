@@ -6,12 +6,13 @@ var Router = Ember.Router.extend({
 });
 
 Router.map(function() {
-	
+
+    this.resource('debug', function() { path: '/debug'});
+
 	this.resource('projects', function() {});
 
 	this.resource('project', { path: '/:project_id'}, function() {       
 		this.resource('start');
-		this.route('export', {path: '/export'});
 
 		this.resource('resources', function() {
 			//Removing nesting because the templates will not be nested.

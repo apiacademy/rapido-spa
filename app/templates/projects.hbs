@@ -17,10 +17,10 @@
         <tbody>          
 			{{#each project in model}}
             <tr>				
-                <td>{{#link-to 'start' project.id}}{{project.name}}{{/link-to}}</td>                
+                <td>{{#link-to 'project.vocabulary' project.id}}{{project.name}}{{/link-to}}</td>                
                 <td>{{project.contentType}}</td>
                 <td>{{project.creationDate}}</td>
-                <td>{{#link-to 'project.export' id}}Export{{/link-to}}</td>
+                <td>{{#link-to 'project.export' project.id}}Export{{/link-to}}</td>
             </tr>            
             {{/each}}               
         </tbody>

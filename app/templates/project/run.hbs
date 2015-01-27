@@ -1,0 +1,19 @@
+<div class="row">
+    <div class="col-md-6">
+    <form>
+    <fieldset>    		
+        <div class="input-group">
+        <span class="input-group-addon">http://</span>
+        {{input type="text" class="form-control" placeholder="" value=projectController.hostname}}           
+        <span class="input-group-addon">.rapidodesign.com</span>
+        </div>
+    </fieldset>
+    </form>
+    </div>    
+</div>
+<div class="row" style="margin-top: 1.0em">
+    <div class="col-md-12">
+        <button {{action 'start'}} class="btn btn-success">Start</button>
+    </div>
+</div>
+

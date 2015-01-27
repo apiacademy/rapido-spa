@@ -1,0 +1,13 @@
+<div class="dropdown">
+  <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">
+      {{name}} <span class="caret"></span>
+  </button>
+  <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
+    <li role="presentation">{{#link-to 'project.vocabulary' role="menuitem" tabindex="-1"}}Vocabulary{{/link-to}}</li>
+    <li role="presentation"><a {{action 'goToSketch'}} role="menuitem" tabindex="-1" href="#">Sketch</a></li>
+    <li role="presentation">{{#link-to 'maps' role="menuitem" tabindex="-1"}}Map{{/link-to}}</li>
+    <li role="presentation">{{#link-to 'project.run' role="menuitem" tabindex="-1" href="#"}}Test{{/link-to}}</li>
+    <li role="presentation">{{#link-to 'project.export' role="menuitem" tabindex="-1" href="#"}}Export{{/link-to}}</li>
+    <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Settings</a></li>
+  </ul>
+</div>

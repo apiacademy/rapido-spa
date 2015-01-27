@@ -118,7 +118,6 @@ var linkTargetDragListener = d3.behavior.drag()
 // The main routine - updates/renders the graph visualization.      
 function initTree(_rootNode) {
 	
-	//console.log(rootNode);
 	rootNode = _rootNode;
             
     canvasWidth = $('#canvas').width();                
@@ -157,7 +156,7 @@ function update(rootNode) {
       .attr("d", diagonal);
 		
 	var node = container.selectAll(".tree-node")
-      .data(nodes, function(d) { return d.id; })
+      .data(nodes, function(d) { console.log(d); return d.get('id'); })
       .enter().append("g")
       .attr("class", "tree-node")
       .attr("transform", function(d) { return "translate(" + d.y + "," + d.x + ")"; })
@@ -198,11 +197,11 @@ function update(rootNode) {
         .attr("rx",5)
         .attr("ry",5)
 		.style("display", function(d) {if(d.root) return 'none'})
-        .attr("class", "node-title")
+        .attr("class", function(d) { console.log(d); var className = 'tree-node-name'; return (className + ' ' + d.get('class'));})
 		.on("click", function (d, i) {
 		  var event = {
                 'type' : 'nodeSelected',
-                'data' : { id: d.id }
+                'data' : { id: d.get('id') }
             };
 			eventHandler(event, function(newValue){});                
 	  });
@@ -224,7 +223,7 @@ function update(rootNode) {
 	  .on("click", function (d, i) {
 		  var event = {
                 'type' : 'createChild',
-                'data' : { parentId: d.id }
+                'data' : { parentId: d.get('id') }
             };
 			eventHandler(event, function(newValue){});                
 	  });
@@ -240,7 +239,7 @@ function update(rootNode) {
 	    .on("click", function (d, i) {
 		  var event = {
                 'type' : 'createChild',
-                'data' : { parentId: d.id }
+                'data' : { parentId: d.get('id') }
             };
 			eventHandler(event, function(newValue){});                
 	  	})
@@ -261,7 +260,7 @@ function update(rootNode) {
 		.attr("dx", 10)
 		.attr("dy", -15)
 		//.style("text-anchor", function(d) { return d.children ? "end" : "start"; })
-		.text(function(d) { return d.url; })
+		.text(function(d) { return d.get('url'); })
 		
 	
   // Resource name
@@ -269,9 +268,9 @@ function update(rootNode) {
   	   .style("display", function(d) {if(d.root) return 'none'})
       .attr("dx", resourceBoxWidth / 2)
       .attr("dy", 15)
-  	  .attr("class", "tree-node-title")
+  	  .attr("class", "tree-node-name-text")
       .style("text-anchor", "middle")
-      .text(function(d) { return d.name; })
+      .text(function(d) { return d.get('name'); })
   	  .on("click", function (d, i) {
 			//d3.event.stopPropagation();
 			// Determine the coordinates
@@ -291,7 +290,7 @@ function update(rootNode) {
                 'data' : { x : corners.nw.x, y: corners.nw.y-16, id: d.nodeId, property: 'title', value: d.title }
             };
 			eventHandler(selectEvent, function(newValue){
-				d.name = newValue;
+				d.get('name') = newValue;
 			});
 	  });		
 	
@@ -327,7 +326,7 @@ function drawMethodTabs(node, methods) {
 			.attr("rx",5)
 			.attr("ry",5)
 			.attr("class", rectClass)
-			.style("display", function(d) {if( d.methods.indexOf(method) < 0) {return "none";}});		
+			.style("display", function(d) {if( d.get('methods').indexOf(method) < 0) {return "none";}});		
 
 		node.append("text")
 					.style("text-anchor", "middle")
@@ -335,7 +334,7 @@ function drawMethodTabs(node, methods) {
 					.attr("dy", -33)
 					.text(method)
 					.attr("class", "tree-node-method-text")
-					.style("display", function(d) {if( d.methods.indexOf(method) < 0) {return "none";}});		
+					.style("display", function(d) {if( d.get('methods').indexOf(method) < 0) {return "none";}});		
 	}	
 }
 	

@@ -17,6 +17,7 @@
     "rsvp": "3.0.13",
     "d3": "3.4.13",
     "typeahead.js": "0.10.5",
-    "ace-builds": "*"
+    "ace-builds": "*",
+    "ember-simple-auth": "0.7.2"
   }
 }

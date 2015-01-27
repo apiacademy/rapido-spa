@@ -5,6 +5,28 @@ export default Ember.Component.extend({
 		
 		//console.log('didInsertElement: node-tree');		
 		var resources = this.get('resources');		
+
+        // convert the resource tree from an ID based tree to an object tree
+        var resourceList = resources.content;
+        var resourceHash = {};
+        for( var i = 0; i < resourceList.length; i++ ) {
+            resourceHash[resourceList[i].get('id')]=resourceList[i];
+        }
+        for( var i =0; i < resourceList.length; i++ ) {
+            var resource = resourceList[i];
+            if( resource.get('parent') ) {
+                resource.parent = resourceHash[resource.get('parent')];
+            }
+            if( resource.get('children') && resource.get('children').length > 0 ) {
+                var children = [];
+                for( var j = 0; j < resource.get('children').length; j++ ) {
+                    var id = resource.get('children')[j];
+                    children.push(resourceHash[id]);
+                }
+                resource.children = children;
+            }
+        }
+
 		var root = createTree(resources);
 		
 		var graphSVG = d3.select('#canvas')
@@ -48,15 +70,22 @@ function createTree(resources) {
 			children: [],
 			url: '',
 			methods: [],
-			root: true
+			root: true,
+            get: function(key) { 
+                return this[key];
+            }
 		};
-		// Create the root node by finding parent-less resources
-		resources.forEach(function(_resource) {			
-			var resource = _resource._data;
-			if(!resource.parent || resource.parent === '0' || resource.parent.id === '0' ) {
-				root.children.push(resource);
-			}
-		});
+
+    // I will need to do the conversion after ember-data screws with my data set
+    // :(
+
+    // Create the root node by finding parent-less resources
+    resources.forEach(function(resource) {			
+        if(!resource.get('parent') ) {
+            root.children.push(resource);
+        }
+    });
+
 	
 	return root;
 }

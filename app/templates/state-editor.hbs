@@ -1,8 +1,12 @@
 <div class="row">
-    <div class="col-md-11"><h2>{{model.name}}</h2><p>{{model.description}}</p></div>
-    <div class="col-md-1">
-        <button type="button" class="btn btn-primary">Cancel</button>
-        <button type="button" class="btn btn-primary">Save</button>
+    <div class="col-md-9"><h2>{{model.name}}</h2><p>{{model.description}}</p></div>
+    <div class="col-md-2 pull-right">
+        {{#if isDirty}}
+        <div class="btn-group">
+            <button type="button" class="btn btn-warning" {{action 'cancel'}}>Cancel</button>
+            <button type="button" class="btn btn-success" {{action 'save'}}>Save</button>
+        </div>
+        {{/if}}
     </div>
 </div>
 <div>{{#each suggestions}}{{this.id}}{{/each}}</div>
@@ -10,7 +14,7 @@
     <div class="col-md-10">
         <div class="row">
             <div class="col-md-12" style="background-color: #157C2A">
-                <span>Collection/json</span><span>Name: Valid.</span>
+                <span>{{controllers.project.contentType}} </span><span>Valid.</span>
             </div>
         </div>
         <div class="row">
@@ -27,8 +31,10 @@
         </div>
     </div>
     <div class="col-md-2">
-       Transitions and other properties. 
-       ideas: show buttons for mediat type wizards (e.g. CJ-data editor), show nodes that link here so that user can navigate around.
+        <div><h3>Outbound Links</h3></div>
+       {{#each outboundLinks}}
+       <div>{{#link-to href id}}{{name}}{{/link-to}}</div>
+       {{/each}}
     </div>
 </div>
         

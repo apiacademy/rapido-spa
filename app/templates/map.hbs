@@ -1,0 +1,81 @@
+<div class="row">
+    <div class="col-md-1">
+		<img src="" width="100%"/>
+    </div>
+	<div class="col-md-11">
+		<h2>{{name}}</h2>
+		<p>{{description}}</p>
+    </div>
+</div>
+
+<div class="row">
+	<div class="col-md-12" style="padding-bottom:1em">		
+		<button type="button" class="btn btn-primary" {{action 'save'}}>Save</button>
+	</div>
+</div>
+<div class="row">	
+    <div class="col-md-12">		
+		{{#each indexedSteps}}		
+			<span style="display:inline-block;vertical-align:top">
+				{{view  'contenteditable-div' class="map-steps" editable="true" plaintext="true" valueBinding="item.value"}}
+				{{#each item.questions}}
+				<div class="map-steps map-questions">{{this}}</div>				
+				{{/each}}
+				{{#each item.comments}}
+				<div class="map-steps map-comments">{{this}}</div>
+				{{/each}}
+				{{#each item.ideas}}
+				<div class="map-steps map-ideas">{{this}}</div>				
+				{{/each}}
+				<div><button type="button" class="btn btn-default btn-lg" {{action 'addNote' index}}>
+  <span class="glyphicon glyphicon-plus"></span> Add Note			
+</button></div>
+			</span>
+		{{/each}}
+		<span style="display:inline-block;vertical-align:top"><button type="button" class="btn btn-default btn-lg" {{action addStep}}>
+  <span class="glyphicon glyphicon-plus"></span> Add Step		
+</button></span>
+    </div>
+</div>
+
+<!-- MODALS -->
+<div id="modal_addNote" class="modal fade">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title">Step Note</h4>		
+      </div>
+      <div class="modal-body">
+          <div class="row">
+              <div class="col-md-12">
+        <form>
+  			<fieldset>    				
+				<div class="form-group"> 										
+					<label class="radio-inline">
+						<input type="radio" name="noteTypeOptions" id="inlineRadio1" value="question" checked="checked"> Question
+					</label>
+					<label class="radio-inline">
+					  <input type="radio" name="noteTypeOptions" id="inlineRadio2" value="comment"> Comment
+					</label>
+					<label class="radio-inline">
+					  <input type="radio" name="noteTypeOptions" id="inlineRadio3" value="idea"> Idea
+					</label>
+				</div>				
+				
+				<div class="form-group">    			
+					{{textarea value=noteValue cols="80" rows="3" class="form-control" placeholder="Note"}}
+                    </div>
+  			</fieldset>
+		</form>
+                  </div>
+              </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Cancel</button>		  
+		  <button type="button" class="btn btn-success" data-dismiss="modal" {{action 'saveNote'}}>Save</button>		  		  		  
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+

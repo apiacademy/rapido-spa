@@ -4,8 +4,8 @@ export default Ember.Route.extend({
 	model: function() {
 		var route = this;
 		return new Promise(function(resolve, reject) {
-			var projectModel = route.modelFor('project');
-			var simpleVocabulary = projectModel.get('simpleVocabulary');
+			var project = route.modelFor('project');
+			var simpleVocabulary = project.get('simpleVocabulary');
 
 			var vocabulary = [];
 

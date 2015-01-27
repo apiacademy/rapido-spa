@@ -23,27 +23,13 @@ export default Ember.ArrayController.extend({
 });
 
 function updateVocabulary(project, vocabulary) {
+    console.log(vocabulary);
 	var simpleVocabulary = [];
 	for( var i = 0; i < vocabulary.length; i++ ) {
 		simpleVocabulary.push(vocabulary[i].value);
 	}
 
-    console.log(simpleVocabulary);
-    console.log(project);
-
     project.set('simpleVocabulary', simpleVocabulary);
     console.log(project);
-    console.log(project.changedAttributes());
     project.save();
-
-
-    /**
-	Backend.update('project.vocabulary', simpleVocabulary, {'project': project.id})
-		.then(function(result) {
-                
-	 }, function( error ) {
-         	console.log(error);
-		//TODO: What do I do if there was an error?
-	});   		
-    **/
 }

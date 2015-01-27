@@ -4,23 +4,19 @@ export default Ember.Route.extend({
 
 	setupController: function(controller, model) {
 		this._super(controller, model);
+        console.log(model);
 
 		var methods = model.get('methods');
 		for( var i = 0; i < methods.length; i++ ) {
 			var propertyName = 'is' + methods[i] + 'Enabled';			
 			controller.set(propertyName, true);
 		}
+        controller.set('activeMethod', model.get('responses')[0].name);
+        console.log('setting isDirty to false');
 	},
     
 	model: function(params) {   
-		var resources = this.modelFor('resources-editor').content;		
-		return new Promise(function(resolve, reject) {
-			for( var i =0; i < resources.length; i++ ) {
-				if( resources[i].id === params.resource_id ) {
-					resolve(resources[i]);
-				}
-			}
-			reject('unable to find resource with id of ' + params.resource_id);
-		});
+
+        return this.store.find('resource', params.resource_id);
 	}
 });

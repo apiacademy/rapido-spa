@@ -49,6 +49,7 @@ var workers = pickFiles('workers', {
 app.import('vendor/rapido/tree.js');
 app.import('vendor/rapido/graph.js');
 app.import('vendor/rapido/cj.js');
+app.import('vendor/rapido/hal.js');
 
 module.exports = app.toTree(workers);
 

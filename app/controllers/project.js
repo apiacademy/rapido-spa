@@ -1,11 +1,9 @@
 import Ember from "ember";
 
 export default Ember.ObjectController.extend({    
-    needs: ['project'],
-	projectController: Ember.computed.alias("controllers.project"),
     actions: {
         goToSketch: function() {
-			var project = this.get('projectController').model;  
+			var project = this.get('content');  
 
             if( project.get('projectType') === 'hypermedia' ) {
                 this.transitionToRoute('states', project.get('id'));

@@ -50,19 +50,71 @@ function generateBody(collectionName) {
 
 
 /**
- * Inserts a new data item into an existing collection.
- * @param {string} the name of the item for this collection 
+ * Parse a Cj document and update this state's transitions based on the contents of the document.
+ * @doc {string} the document to parse in string format
+ * @states {Array} a collection of ember-data state records.  
+ * @states {Record} an ember-data record of the state that owns the response body 
  */
-function insertItem(collection)  {
+function parse(doc, states, source)  {
+    var cjDoc = JSON.parse(doc);
+
+    /* transitions may be mapped to any of:
+     *    1.  collection.links
+     *    2.  collection.items
+     *    3.  colleciton.items.links
+     *    4.  colleciton.items.queries
+     *    5.  collection.queries
+     **/
+
+    // Keep track of transitions that we have identified in the document
+    
+    var transitionsToBeMatched = {};
+    var transitions = source.get('transitions');
+    
+    for( var i = 0; i < transitions.length; i++ ) {
+        transitionsToBeMatched[transitions[i].target+'.'+transitions[i].className] = transitions[i];
+    }
+    console.log(transitionsToBeMatched);
+
+    if( !cjDoc.collection ) { return; }
+    var collection = cjDoc.collection;
+
+    if( collection.links ) {
+        for( var i = 0; i < collection.links; i++ ) {
+            var link = collection.links[i];
+        }
+    }
 
 }
+
+function exportModel( exportType, states ) {
+    var ex = '';
+    
+    if( exportType === 'WADL' ) { 
+        
+    }
+    return exportType;
+}
+
+/**
+  Class names:
+  cj-link
+  cj-query
+  cj-item
+  cj-item-link
+  cj-item-query
+  **/
     
 return {    
-    create: function(collectionName) {
-        return generateBody(collectionName);
-    }, 
-    insertItem: function(itemId, body) {
+    parse: function(doc, states, source) {
+        parse(doc, states, source);
     },
-    contentType: 'application/vnd.collection+json'
+    exportModel: function( exportType, states ) {
+        return exportModel(exportType, states);
+    },
+
+    name: 'Collection+JSON',
+    contentType: 'application/vnd.collection+json',
+    keywords: ['collection','items','data','href','version','template','name','value']
 }
 }());

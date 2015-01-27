@@ -24,6 +24,13 @@ module.exports = function(environment) {
     }
   };
 
+  ENV['simple-auth'] = {
+    routeAfterAuthentication: '/projects',
+    store: 'simple-auth-session-store:local-storage',
+    authorizer: 'authorizer:rapido',
+    crossOriginWhitelist: ['http://localhost:8081']
+  };
+
   if (environment === 'development') {
     // ENV.APP.LOG_RESOLVER = true;
     ENV.APP.LOG_ACTIVE_GENERATION = true;
@@ -48,7 +55,7 @@ module.exports = function(environment) {
   }
 
   if (environment === 'production') {
-      ENV.backend = 'http://rapidodesigner.com';
+      ENV.backend = 'http://rapidodesigner.com/backend';
   }
 
   return ENV;

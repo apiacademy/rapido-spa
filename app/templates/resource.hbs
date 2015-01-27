@@ -2,16 +2,17 @@
 	<div class="col-md-2">
 		<div>
 			<form>
-				{{#if isDirty}}
+                <!-- isDirty isn't working right now -->
+				{{#if model}}
 				<div class="btn-group">
-				<button class="btn btn-primary" type="button" {{action 'saveResponse'}}>Save</button>
+				<button class="btn btn-primary" type="button" {{action 'save'}}>Save</button>
 				</div>
 				<div class="btn-group">
-				<button class="btn btn-warning" type="button" {{action 'cancelEdit'}}>Cancel</button>				
+				<button class="btn btn-warning" type="button" {{action 'cancel'}}>Cancel</button>				
 				</div>				
 				{{else}}
-				<button class="btn btn-primary disabled" type="button" {{action 'saveResponse'}}>Save</button>
-				<button class="btn btn-warning disabled" type="button" {{action 'cancelEdit'}}>Cancel</button>				
+				<button class="btn btn-primary disabled" type="button" {{action 'save'}}>Save</button>
+				<button class="btn btn-warning disabled" type="button" {{action 'cancel'}}>Cancel</button>				
 				{{/if}}				
 				<div class="form-group">													
 					<form>
@@ -73,13 +74,12 @@
 								class="form-control" 
 								content=responseStates 
 								style="max-width: 10.0em"							
-								value=activeResponseState}}							  
+								value=activeMethod}}							  
 						</div>					
 					</div>
-								
 				<div id="editor">
 					{{ace-editor 
-						text=responseBody 
+						text=responseBody
 						mode=aceMode 
 						typeAheadSuggestions=suggestions 
 						typeAheadAction="setTypeAheadList"  

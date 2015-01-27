@@ -1,76 +1,61 @@
 <section id="topnav">
-<!-- Top Nav -->
-{{outlet topnavbar}}
-<nav class="navbar navbar-default" role="navigation">
-    <div class="container-fluid">
-    
-    <!-- Brand and toggle get grouped for better mobile display -->
-    <div class="navbar-header">
-        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
-            <span class="sr-only">Toggle navigation</span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-        </button>
-    <a class="navbar-brand" href="#">Rápido!</a>
-    </div>    
 
-    <!-- Collect the nav links, forms, and other content for toggling -->
-    <div class="collapse navbar-collapse">
-        {{outlet menubar}}        
-        {{#if isAuthenticated}}
-        <div class="navbar-right">
-            <div class="btn-group navbar-btn">
-                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-label="Right Align">
-                  <span class="glyphicon glyphicon-user" aria-hidden="true"></span>
-                </button>
-                <ul class="dropdown-menu" role="menu">
-                    <li><a {{action 'signOut'}} href="#">Sign Out</a></li>
-                    <li class="divider"></li>
-                    <li><a {{action 'manage'}} href="#">Manage Account</a></li>
-                </ul>
-            </div>
+{{#if session.isAuthenticated}}
+<div class="row">
+    <div class="col-md-1">{{#link-to 'projects'}}<h3>Rápido!</h3>{{/link-to}}</div>
+    <div class="col-md-2 navbar-btn">{{outlet projectmenu}}</div>
+    <div class="col-md-1 col-md-offset-8 pull-right">
+        <div class="btn-group navbar-btn">
+            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-label="Right Align">
+                <span class="glyphicon glyphicon-user" aria-hidden="true"></span>
+            </button>
+            <ul class="dropdown-menu" role="menu">
+                <li><a {{action 'signOut'}} href="#">Sign Out</a></li>
+                <li class="divider"></li>
+                <li><a {{action 'manage'}} href="#">Manage Account</a></li>
+            </ul>
             <div><small class="align-right">{{username}}</small></div>
         </div>
-        <!--
-        <button {{action 'signOut'}} class="btn btn-warning navbar-btn navbar-right" type="button">Signout</button>
-        -->
-        <p class="navbar-text navbar-right">{{id}}</p>        
-        {{else}}
-        <form class="login-form navbar-form navbar-right" {{action 'signIn' on='submit'}}>
+    </div>
+</div>
+{{else}}
+
+
+<div class="row">
+    <div class="col-md-1"><a href="#"><h3>Rápido!</h3></a></div>
+    <div class="col-md-2 col-md-offset-9 pull-right">
+        <form class="login-form navbar-form navbar-right" {{action 'authenticate' on='submit'}}>
         <div class="form-group">
-            {{input type="text" class="login-name form-control" value=login_username placeholder="username"}}  {{input type="password" value=login_password class="login-password form-control" placeholder="password"}}
+            {{input type="text" class="login-name form-control" value=identification placeholder="username"}}  {{input type="password" value=password class="login-password form-control" placeholder="password"}}
         </div>
         <button type="submit" class="login-submit btn btn-default">Submit</button>
         </form>    
-        {{/if}}      
-    </div><!-- /.navbar-collapse -->
-    </div><!-- /.container-fluid -->
-</nav>    
+    </div>
+</div>
+{{/if}}      
 </section>
-{{#if isAuthenticated}}
+{{#if session.isAuthenticated}}
 {{outlet}}
 {{else}}
-<!-- Begin MailChimp Signup Form -->
-<form role="form">
-  <div class="form-group">
-      <h3>Sign up for early access</h3>
-    {{input class='form-control' value=email placeholder='Enter email address'}}
-    {{input class='form-control' value=firstName placeholder='First Name'}}
-    {{input class='form-control' value=lastName placeholder='Last Name'}}
-  </div>
-  <button {{action 'register'}} type="submit" class="btn btn-default">Submit</button>
-</form>
+{{#if subscribed}}
+<div class="row">
+    <div class="col-md-12">
+        <h4>Thank you for signing up!</h4>
+        <p>You should receive a confirmation email shortly.</p>
     </div>
-    <small class="text-right">
-        username.
-    </small>
-<!--End mc_embed_signup-->
-{{/if}}
-
-    
-<div id="type-ahead" class="type-ahead" style="padding: .05em .05em; ">    
-    {{#each suggestion in typeAheadSuggestions}}
-    <div class="type-ahead-suggestion" style="white-space: nowrap; cursor: pointer;" {{action "suggestionClicked" suggestion on="click"}}>{{suggestion}}</div>
-    {{/each}}
 </div>
+{{else}}
+<div class="row">
+    <div class="col-md-4 col-md-offset-4 bg-info" style-"padding-bottom:1.0em">
+        <form role="form">
+          <div style="padding-bottom: 0.5em"><h4>Sign up for early access</h4></div>
+          <div class="form-group">{{input class='form-control' type='email' value=email placeholder='Enter email address'}}</div>
+          <div class="form-group">{{input class='form-control' type='text' value=firstName placeholder='First Name'}}</div>
+          <div class="form-group">{{input class='form-control' type='text' value=lastName placeholder='Last Name'}}</div>
+          <button {{action 'register'}} type="submit" class="btn btn-default pull-right">Submit</button>
+        </form>
+    </div>
+</div>
+</div>
+{{/if}}
+{{/if}}

@@ -3,16 +3,10 @@ import Ember from "ember";
 export default Ember.ArrayController.extend({
 	needs: ['project'],
 	projectController: Ember.computed.alias("controllers.project"),
-	/*
-	resources: function() {
-		console.log('resources changed');
-		return this.get('model').resources;		
-	}.property('model'.resources),    
-	*/
 	typeaheadData: function() {						
-		return this.get('projectController').model.simpleVocabulary;		
+		return this.get('projectController').model.get('simpleVocabulary');
 	}.property(),
-	isGETEnabled: false,
+	isGETEnabled: true,
 	isPUTEnabled: false,
 	isPOSTEnabled: false,
 	isDELETEENabled: false,
@@ -25,25 +19,39 @@ export default Ember.ArrayController.extend({
 	newResourceName: '',
 	newResourceUri: '',
 	newResourceDescription: '',
+    newResourceIsDynamic: false,
 	newResourceNameUpdated: function(e) {
 		//TODO: Need rules to determine when to overwrite this URI and when not to (example, if the user has created a custom URI)
 		var parent = this.get('newResourceParent');			
 		var parentUri = '/';
 		if( parent ) {
-			parentUri = parent.url + '/';			
+			parentUri = parent.get('url') + '/';			
 		}
-		var newUri = encodeURI(e.newResourceName);		
-		this.set('newResourceUri', parentUri + newUri);						
+       
+        var name = this.get('newResourceName'); 
+        if( name.indexOf('{') === 0 && name.charAt(name.length-1) === '}' ) {
+            this.set('newResourceIsDynamic', true);
+            var dynamicName = name.substring(1,name.length-1);
+            var newUri = encodeURI(e.newResourceName);
+            newUri = newUri.replace(/7b/g,'{');
+            this.set('newResourceUri', parentUri + newUri);
+
+        }else {
+            var newUri = encodeURI(e.newResourceName);		
+            this.set('newResourceIsDynamic', false);
+            this.set('newResourceUri', parentUri + newUri);						
+        }
+		
 	}.observes('newResourceName'),
     actions: {
 		createChildResource: function(parentId) {
 			$('#modal_wizard_1').modal();
 			this.set('wizardPage', 1);			
-			var resources = this.get('content');		
+			var resources = this.get('model').content;		
 			var parent = findParent(parentId, resources);			
 			this.set('newResourceParent', parent);
 			if( parent ) {
-				this.set('newResourceUri', parent.url + '/');
+				this.set('newResourceUri', parent.get('url') + '/');
 			}
 		},
 		nextWizardStep: function(e) {
@@ -68,10 +76,13 @@ export default Ember.ArrayController.extend({
 		},
 		saveResource: function() {
 			console.log('saveResource');
-			var projectId = this.get('projectController').model.id;  
+			var projectId = this.get('projectController').model.get('id');
 			
 			// Find the parent resource			
-			var parent = this.get('newResourceParent');									
+            var parentID = null;
+            if( this.get('newResourceParent') ) {
+                parentID = this.get('newResourceParent').get('id');
+            }
 			
 			// Create the method array string
 			var methods = [];
@@ -90,60 +101,39 @@ export default Ember.ArrayController.extend({
 				responses.push({name: "DELETE", body: ""});
 			}
 
+            var resourceType = 'resource'
+            if( this.get('newResourceIsDynamic') ) {
+                resourceType = 'dynamic'
+            }
+
+            console.log(resourceType);
+
 			var newResource = this.store.createRecord('resource', {
 				name: this.get('newResourceName'),                
 				description: this.get('newResourceDescription'),                
 				responses: responses,
 				url: this.get('newResourceUri'),
 				children: [],
-				parent: parent,
+				parent: parentID,
 				methods: methods,
+                class: resourceType,
 				project: projectId
 			});
-			newResource.save();
 
-			/*
-			// Create new response state
-			var newResource = App.CRUDResourceModel.create({
-                name: this.get('newResourceName'),                
-                description: this.get('newResourceDescription'),                
-				responses: responses,
-				url: this.get('newResourceUri'),
-				children: [],
-				parent: parent,
-				methods: methods
-            });
-			var component = this;
-			Backend.create('CRUDResource', newResource, {'project': projectId})
-				.then(function(result) {
-					
-				component.set('newResourceName', '');
-				component.set('newResourceDescription', '');
-				
-				
-					// Update the child array of this resource's parent
-					if( result.parent ) {
-						if( result.parent.children ) {
-							result.parent.children.push(result);
-						}else {
-							result.parent.children = [result];
-						}
-					}
-				
-				component.get('model').pushObject(result);					
-				}).then(function(error) {
-					if( error ) console.log(error);
-				});
-			*/		
+            console.log(newResource);
+            console.log(newResource.get('class'));
+			newResource.save();
 		}
     }
 });
 
 function findParent(parentId, resources) {
 	// Find the parent resource								
-	if( parentId ) {							
-		for( var i=0; i < resources.length; i++ ) {					
-			if( resources[i].id === parentId ) { return resources[i]; }
+	if( parentId ) {				
+                
+		for( var i=0; i < resources.length; i++ ) {	
+            console.log(resources[i]);            
+			if( resources[i].get('id') === parentId ) { return resources[i]; }
 		}
 	}	
 }

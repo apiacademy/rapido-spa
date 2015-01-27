@@ -2,7 +2,6 @@ import Ember from "ember";
 
 export default Ember.Component.extend({
     editor: {},
-    typeAheadtoken: '',
     updatingText: false,
     didInsertElement: function() {
         
@@ -15,11 +14,6 @@ export default Ember.Component.extend({
     
     // Retrieve the ID of the div element that is wrapping this component
     var editorDiv = $('#' + this.elementId).parent()[0];        
-    //console.log(editorDiv);
-    //console.log($(editorDiv).parent().height());
-    //var wrapperHeight = editorDiv.parent().height();        
-    //editorDiv.height(wrapperHeight);
-    //console.log(wrapperHeight);
     //TODO: Hardcode the height for now.
     $(editorDiv).height(500);
             
@@ -42,6 +36,8 @@ export default Ember.Component.extend({
 
     // Get vocabulary lists
     var nodeList = this.get('nodeList');
+    if( !nodeList ) { nodeList = []; }
+    if( !typeAheadSuggestions ) { typeAheadSuggestions = []; }
 
     var simpleVocabCompleter = {
         getCompletions: function(editor, session, pos, prefix, callback) {
@@ -97,8 +93,10 @@ export default Ember.Component.extend({
     },
     
     updateText: function() {
+        console.log('text has changed!');
         var editor = this.editor;
         var text = this.get('text');
+        console.log(text);
         this.updatingText = true;
         editor.setValue(text, 1);
         this.updatingText = false;
@@ -111,12 +109,4 @@ export default Ember.Component.extend({
         editor.getSession().setMode(mode);
     }.observes('mode'),
     
-    typeAheadSuggestionSelected: function() {
-        var suggestion = this.get('suggestionClicked');
-        var textToInsert = suggestion.substring(this.typeAheadtoken.length, suggestion.length);        
-        var editor = this.editor;
-        var cursorPosition = editor.getSession().getSelection().getCursor();
-        editor.getSession().insert(cursorPosition, textToInsert);
-        $('#type-ahead').dialog('close');    
-    }.observes('suggestionClicked')
 });

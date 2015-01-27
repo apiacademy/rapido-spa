@@ -12,11 +12,11 @@ var linkedNodes = [];
 var orphanNodes = [];
 var graphSVG = null;
         
-var force = null;
+var force,idMap = null;
 var path, canvas, zoomContainer;
 var linkedNodesSVG = null;
 
-var orbitRadius = 100;
+//var orbitRadius = 100;
     
 var eventHandler = function(event, callback) {
     //console.log('Warning: no event handler defined for graph');
@@ -64,6 +64,7 @@ function dragend(d) {
    so should the size of the 'planet'
    */
 function calculateRadius(numTransitions) {
+    // not working, disable for the demo
     return 80 + 4 * numTransitions;
 }
 
@@ -81,7 +82,6 @@ function drawHomeNode(container, nodes) {
     var node = container.selectAll(".tree-node")
       .data(nodes, function(d) {return d.get('id'); })
       .enter().append("g")
-      .attr("class", "tree-node")
       .attr("transform", function(d) { return "translate(" + d.y + (canvasWidth / 2) +  "," + (d.x + 0) + ")"; })
       .on("click", function(d) { 
           if( d3.event.defaultPrevented ) {
@@ -166,7 +166,7 @@ function initGraph(_nodes) {
     } 
     
     nodes = _nodes;
-    var idMap = {};    
+    idMap = {};    
     
     // Convert the application dataset into something that we can use with d3
     
@@ -208,6 +208,7 @@ function initGraph(_nodes) {
 
                 // Store the calculated angle in this transition object so we can draw the orbiting sphere from the point that the path starts.
                 transition.theta = _theta;
+                transition.source = sourceNode.get('id');
 
                 // Change the nodeTypes of the source and target nodes to indicate that they are no longer orphans
                 sourceNode.nodeType = 'linked';
@@ -282,7 +283,6 @@ function canvas_dragstarted(d) {
     
     if( _nodes.length == 1 ) {
         // Draw a single home node
-        console.log('single node');
         drawHomeNode(graphSVG, nodes);
     }else {
         update();
@@ -317,7 +317,6 @@ function update() {
         }
     }
         
-    console.log(linkedNodes);
     //console.log(orphanNodes);
     
         
@@ -354,9 +353,6 @@ function update() {
     // remove old links
     path.exit().remove();
 
-console.log('linkedNodes:');	
-console.log(linkedNodes);	
-    
   linkedNodesSVG = linkedNodesSVG.data(linkedNodes, function(d) { if( d.nodeType != 'orphan' ) return d.get('id'); });
   linkedNodesSVG.exit().remove();
     
@@ -415,37 +411,39 @@ console.log(linkedNodes);
     // Transition circle and label.  Draw an orbital for each transition emanating from this node.
     // The path will be drawn in the tick function from the same theta.
     var transitionOrbital = linkedNodesSVG.selectAll('.transition')
-        .data(function(d,i) { return nodes[i].get('transitions'); })
+        .data(function(d,i) { return linkedNodes[i].get('transitions'); })
         .enter().append('svg:g');
         
     transitionOrbital
         .append('svg:circle')
-            .attr('class', 'transition')
+            .attr('class', function(d) { console.log(d); return 'transition ' + d.className;})
             .attr('r', 10)
             .attr('cx', function(d,i) { 
-                var numTransitions = nodes[i].get('transitions').length; 
-                console.log(nodes[i].get('name'));
-                console.log(numTransitions);
+                var source = idMap[d.source];
+                var numTransitions = source.get('transitions').length; 
                 return (calculateRadius(numTransitions) * Math.cos(d.theta)); 
             })
             .attr('cy', function(d,i) { 
-                var numTransitions = nodes[i].get('transitions').length;
+                var source = idMap[d.source];
+                var numTransitions = source.get('transitions').length; 
                 return (calculateRadius(numTransitions) * Math.sin(d.theta)); 
             });
 
     transitionOrbital
         .append("text")
             .attr("x", function(d,i) { 
-                var numTransitions = nodes[i].get('transitions').length; 
+                var source = idMap[d.source];
+                var numTransitions = source.get('transitions').length; 
                 return (calculateRadius(numTransitions) * Math.cos(d.theta)) + 22; 
             })
             .attr("y", function(d,i) {
-                var numTransitions = nodes[i].get('transitions').length; 
+                var source = idMap[d.source];
+                var numTransitions = source.get('transitions').length; 
                 return (calculateRadius(numTransitions) * Math.sin(d.theta)); 
             })
 			.attr("text-anchor", "left")
 			.attr("class", "transition-text")
-            .text(function( d ) { console.log(d); return d.name; }); 
+            .text(function( d ) { return d.name; }); 
        
     //State rectangle
 	linkedNodesSVG

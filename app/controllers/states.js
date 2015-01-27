@@ -1,6 +1,9 @@
 import Ember from "ember";
 
 export default Ember.ArrayController.extend({
+    needs: ['project'],
+    projectController: Ember.computed.alias('controllers.project'),
+
     transitionCreationActions: function() {
         // the list of availabile modal flows for a create link activitiy based on the media type 
         return [{'description': 'add item', 'icon': 'blah'}]
@@ -17,7 +20,12 @@ export default Ember.ArrayController.extend({
            }
         },
         createTransition: function(id) {
-            this.transitionToRoute('state.create-cj-transition', id);
+            var project = this.get('projectController').get('model');
+            if( project.get('contentType') === CollectionJSON.contentType ) {
+                this.transitionToRoute('state.create-cj-transition', id);
+            }else if( project.get('contentType') === HAL.contentType ) {
+                this.transitionToRoute('state.create-hal-transition', id);
+            }
         },
        stateMoved: function(state) {
            state.set('x', state.x);

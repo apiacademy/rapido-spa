@@ -5,6 +5,12 @@ var host = ENV.backend;
 var url;
 var record;
 
+/** 
+ * Authentication tokens are automatically injected by the Simple Auth module.
+ * See app/authorizers/rapido.js
+ */
+
+
 /**
  * Creates objects on the server
  * @token {string} ???
@@ -15,11 +21,7 @@ function createObject(token, url, data, callback) {
         url: url,
         type: 'POST',                    
         contentType : 'application/json',
-        data: JSON.stringify(data),
-        beforeSend: function( request ) {
-            var bearerAuthString = 'Bearer ' + token;
-            request.setRequestHeader("Authorization", bearerAuthString);
-        }
+        data: JSON.stringify(data)
     });
                 
     createAJAX.done( function( response, textStatus, jqXHR ) {                    
@@ -34,19 +36,14 @@ function createObject(token, url, data, callback) {
 
 /**
  * Retrieves objects from the server
- * @token {string} ???
  * @url {string} full resource path
  * @return {Promise} promise
  */
 
-function getObjects(token, url, callback) {
+function getObjects(url, callback) {
     var getAJAX = $.ajax({
         url: url,
-        type: 'GET',                    
-        beforeSend: function( request ) {
-            var bearerAuthString = 'Bearer ' + token;                    
-            request.setRequestHeader("Authorization", bearerAuthString);
-        }
+        type: 'GET'
     });
                 
     getAJAX.done( function( data, textStatus, jqXHR ) {                            
@@ -56,6 +53,8 @@ function getObjects(token, url, callback) {
     getAJAX.fail( function( data, textStatus, jqXHR ) {
         callback(textStatus, null);
     });
+    
+
 }
 
 /**
@@ -118,18 +117,23 @@ function deleteObject(token, url, callback) {
  * Connects with my custom backend.
  */
 export default DS.Adapter.extend({	
-	find: function(store, type, id, record) {		
-		console.log(store);
-		console.log(type);
-		console.log(id);
-		console.log(record);
-		return new Promise(function(resolve,reject) { reject('not implemented.'); });
-  	},
+    find: function(store, type, id ) {
+		url = host;
+        return new Promise(function(resolve,reject) {
+            if( type.typeKey === 'project' ) {
+                url = url + '/projects/' + id;
+            }else {
+				reject('find is not supported for record type ' + type);
+			}
+			
+            getObjects(url, function(error, result) {
+				if( error === null ) { resolve(result[0]); } 
+				else { reject(error); }
+			});
+        });
+    },
 	findAll: function(store, type, sinceToken) {
-		//console.log(type.typeKey);
-		//console.log(sinceToken);
 
-		var token = localStorage.token;
 		url = host;
 	
 		return new Promise(function(resolve,reject) {
@@ -139,7 +143,7 @@ export default DS.Adapter.extend({
 				reject('findAll is not supported for this record type.');
 			}
 
-			getObjects(token, url, function(error, result) {
+			getObjects(url, function(error, result) {
 				if( error === null ) { resolve(result); } 
 				else { reject(error); }
 			});
@@ -147,71 +151,34 @@ export default DS.Adapter.extend({
 		
 	},
 	findQuery: function(store, type, query) {		
-		var token = localStorage.token;
 		url = host;
 
-		if( type.typeKey === 'resource') {
+        if( type.typeKey === 'project') {
+			var projectId = query.project;
+            url = url + '/projects/' + projectId;
+        } else if( type.typeKey === 'resource') {
 			var projectId = query.project;
 			url = url + '/projects/' + projectId + '/resources';
 		} else if ( type.typeKey === 'state' ) {
 			var projectId = query.project;
 			url = url + '/projects/' + projectId + '/states';
-
-			/** Mock the response for now.  Implement in back once we work out the details. **/
-            /**
-			return new Promise(function(resolve,reject) {
-                
-				var _state = [
-					{
-                        name: "state1",
-                        _id: "asdf1",
-                        description: "state description",
-                        transitions: [
-                           {name: 'transition1', methods: ['GET'], target: 'asdf2'},
-                           {name: 't2', methods: ['GET'], target: '3'},
-                           {name: 't3', methods: ['GET'], target: '4'}
-                        ],
-                        responses: {'primary': '{ \"collection\": {}}'}
-                    },
-					{
-                        name: "state2",
-                        _id: "asdf2",
-                        description: "another description",
-                        transitions: [],
-                        responses: {'primary': '{ \"collection\": {}}'}
-                    },
-                    {
-                        name: "state3",
-                        _id: "3",
-                        description: "third",
-                        transitions: [],
-                        responses: {'primary': ''}
-                    },
-                    {
-                        name: "state 4",
-                        _id: "4",
-                        description: "third",
-                        transitions: [],
-                        responses: {'primary': ''}
-                    }
-				];
-				console.log(_state);
-				resolve(_state);
-			});**/
-		} else {
+		} else if ( type.typeKey === 'map' ) { 
+            console.log('looking for maps');
+            var projectId = query.project;
+            url = url + '/projects/' + projectId + '/maps';
+        } else {
 			console.error('findQuery is not supported for this record type.');
 		}
 
 
 		return new Promise(function(resolve,reject) {
-			getObjects(token, url, function(error, result) {
+			getObjects(url, function(error, result) {
 				if( error === null ) { resolve(result); } 
 				else { reject(error); }
 			});
 		});
 	},
 	createRecord: function(store, type, record) {
-		console.log('**** createRecord ****');
 		var token = localStorage.token;
 		url = host;
 		//TODO: Check if token is valid, reject if it is not there.
@@ -224,9 +191,10 @@ export default DS.Adapter.extend({
 					_record = {		        
 						name: record.get('name'),
 						description: record.get('description'),
-						hostname: '',
+						hostname: record.get('hostname'),
 						contentType: record.get('contentType'),
-						projectType: record.get('projectType')
+						projectType: record.get('projectType'),
+                        templates: record.get('templates'),
 					};
 					url = url + '/projects';
 			} else if( type.typeKey === 'resource' ) {			
@@ -239,14 +207,16 @@ export default DS.Adapter.extend({
 						responses: record.get('responses'),
 						url: record.get('url'),
 						children: record.get('children'),
-						parent: record.get('parentId'),
-						methods: record.get('methods')
+						parent: record.get('parent'),
+						methods: record.get('methods'),
+                        class: record.get('class')
 					}
 				};
+                console.log(_record);
 				url = url + '/projects/' + projectId + '/resources';
 			} else if( type.typeKey === 'state' ) {
                 var projectId = record.get('project');
-				if( !record.get('project') ) { reject('A parent project identifier property must be present on records of type \'resource\''); }
+				if( !record.get('project') ) { reject('A parent project identifier property must be present on records of type \'state\''); }
                 _record = {
                     state: {
                         name: record.get('name'),
@@ -256,6 +226,17 @@ export default DS.Adapter.extend({
                     }
                 };
                 url = url + '/projects/' + projectId + '/states';
+            } else if ( type.typeKey === 'map' ) {
+                var projectId = record.get('project');
+				if( !record.get('project') ) { reject('A parent project identifier property must be present on records of type \'map\''); }
+                _record = {
+                    map :  {
+                        name: record.get('name'),
+                        description: record.get('description'),
+                        steps: record.get('steps')
+                    }
+                };
+                url = url + '/projects/' + projectId + '/maps';
             } else {
 				reject('unknown record type');
 			}
@@ -274,6 +255,7 @@ export default DS.Adapter.extend({
 
 		return new Promise(function(resolve,reject) {
             if( type.typeKey === 'project' ) {
+                console.log(record);
                 _record = {
                     simpleVocabulary: record.get('simpleVocabulary')
                 }
@@ -288,8 +270,9 @@ export default DS.Adapter.extend({
 						responses: record.get('responses'),
 						url: record.get('url'),
 						children: record.get('children'),
-						parent: record.get('parentId'),
-						methods: record.get('methods')
+						parent: record.get('parent'),
+						methods: record.get('methods'),
+                        class: record.get('class')
 					}
 				};
 				url = url + '/projects/' + projectId + '/resources/' + record.get('id');
@@ -307,7 +290,20 @@ export default DS.Adapter.extend({
                         y: record.get('y')
                     }
                 };
+
                 url = url + '/projects/' + projectId + '/states/' + record.get('id');
+            } else if( type.typeKey === 'map' ) {
+				if( !record.get('project') ) { reject('A parent project identifier property must be present on records of type \'map\''); }
+                var projectId = record.get('project');
+                var mapId = record.get('id');
+                _record = {
+                    map :  {
+                        name: record.get('name'),
+                        description: record.get('description'),
+                        steps: record.get('steps')
+                    }
+                };
+                url = url + '/projects/' + projectId + '/maps/' + mapId;
             } else {
 				reject('this record type cannot be updated.');
 			}
