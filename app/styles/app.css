@@ -67,10 +67,15 @@ html, body {
 }
 
 /* Media Type plugin styles */
+.help-panel {
+    background: gray;
+    opacity: 1.0;
+}
 .create-transition-wizard {
     border-bottom-style: solid;
     border-color: #0D47A1;
-    background:  #E3F2FD; 
+    //background:  #E3F2FD; 
+    background:  #FFFFFF; 
     position: absolute; 
     width: 100%;
     opacity: 0.9;

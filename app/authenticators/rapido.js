@@ -44,8 +44,19 @@ export default Base.extend({
   },
   invalidate: function(data) {
       return new Promise(function(resolve,reject){ 
-          //TODO: Let the server know that the user has logged out
-          resolve();
+           var loginRequest = $.ajax({
+            url: host + '/logout',
+            type: 'POST'
+        });
+
+        loginRequest.done( function( data, textStatus, jqXHR ) {                    
+            resolve({token:data.token});
+        });
+
+        loginRequest.fail( function( data, textStatus, jqXHR ) {
+            reject(textStatus);
+        });
+
       });
   }
 });

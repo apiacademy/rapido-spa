@@ -97,9 +97,14 @@ export default Ember.ObjectController.extend( {
             var contentType = this.get('projectController').model.get('contentType');
 
             if( contentType === CollectionJSON.contentType ) {
-                CollectionJSON.parse(this.get('dirtyResponse'), states, this.get('model'));
-            } else {
+            	CollectionJSON.parse(this.get('dirtyResponse'), states, this.get('model'));
+            	var responses = this.get('model').get('responses');
+		responses.primary = this.get('dirtyResponse');
+		this.get('model').set('responses', responses);
+		this.get('model').save();
+	    } else {
                 // Treat this as a generic app/json, just save it.
+		console.log('in else branch');
             }
         }
     }

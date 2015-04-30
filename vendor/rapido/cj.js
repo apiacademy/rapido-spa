@@ -53,7 +53,7 @@ function generateBody(collectionName) {
  * Parse a Cj document and update this state's transitions based on the contents of the document.
  * @doc {string} the document to parse in string format
  * @states {Array} a collection of ember-data state records.  
- * @states {Record} an ember-data record of the state that owns the response body 
+ * @source {Record} an ember-data record of the state that owns the response body 
  */
 function parse(doc, states, source)  {
     var cjDoc = JSON.parse(doc);
@@ -70,21 +70,68 @@ function parse(doc, states, source)  {
     
     var transitionsToBeMatched = {};
     var transitions = source.get('transitions');
+
+	// Existing Transitions = t1
+	// parse links,queries,items,etc
+	// when transition is found, move it to the new transitions object
     
     for( var i = 0; i < transitions.length; i++ ) {
         transitionsToBeMatched[transitions[i].target+'.'+transitions[i].className] = transitions[i];
     }
+	var newTransitions = [];
+
+	function parseTransition(name, className) {
+		var id = nameMap[name];
+		var matchingTransition = transitionsToBeMatched[id+className];
+		if( matchingTransition ) {
+			newTransitions.push(matchingTransition);
+		}
+		else {
+			console.log('This is a new transition and needs to be added');
+		}
+	}
+
+	// Sort the transitions to be matched by their target name.  This will allow us to determine which transitions still exist, which
+	// have been deleted, and which ones are new.
+	
+	var nameMap = {}
+	for( var i =0; i < states.length; i++ ) {
+		nameMap[states[i].get('name')] = states[i].get('id');
+	}
+
     console.log(transitionsToBeMatched);
 
     if( !cjDoc.collection ) { return; }
     var collection = cjDoc.collection;
 
-    if( collection.links ) {
-        for( var i = 0; i < collection.links; i++ ) {
-            var link = collection.links[i];
+    
+    if( cjDoc.links ) {
+        for( var i = 0; i < cjDoc.links.length; i++ ) {
+            var link = cjDoc.links[i];
+			var name = link.href.substr(2, link.href.length-3);
+			parseTransition(name, '.cj-link');
         }
     }
 
+    if( collection.items ) {
+		for( var i = 0; i < collection.items.length; i++ ) {
+			var item = collection.items[i];
+			// Lookup the object ID for this item link
+			var name = item.href.substr(2, item.href.length-3);
+			parseTransition(name, '.cj-item');
+		}
+    }
+
+	if( cjDoc.queries ) {
+		for( var i = 0; i < cjDoc.queries.length; i++ ) {
+			var query = cjDoc.queries[i];
+			var name = query.href.substr(2, query.href.length-3);
+			parseTransition(name, '.cj-query');
+		}
+	}
+
+	// If transitions have been changed, save the updated transitions to the server 
+	source.set('transitions', newTransitions);
 }
 
 function exportModel( exportType, states ) {

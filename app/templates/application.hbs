@@ -3,8 +3,8 @@
 {{#if session.isAuthenticated}}
 <div class="row">
     <div class="col-md-1">{{#link-to 'projects'}}<h3>Rápido!</h3>{{/link-to}}</div>
-    <div class="col-md-2 navbar-btn">{{outlet projectmenu}}</div>
-    <div class="col-md-1 col-md-offset-8 pull-right">
+    <div class="col-md-10 navbar-btn">{{outlet projectmenu}}</div>
+    <div class="col-md-1 pull-right">
         <div class="btn-group navbar-btn">
             <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-label="Right Align">
                 <span class="glyphicon glyphicon-user" aria-hidden="true"></span>

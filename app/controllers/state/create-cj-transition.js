@@ -95,6 +95,13 @@ console.log(items);
            var projectId = this.get('projectController').model.id;  
            var newState = this.store.createRecord('state', { project: projectId, name: this.get('collectionName') });
            newState.save().then(function(savedState) {
+			   var itemResponse = JSON.parse(savedState.get('responses').primary);
+			   var itemUrl = '$(' + savedState.get('name') + ')';
+			   itemResponse.collection.items = [];
+			   itemResponse.collection.items.push({"href" :  itemUrl, "data": []});
+			   savedState.set('responses', {primary: JSON.stringify(itemResponse, null, '    ')});
+			   return savedState.save();
+		   }).then(function(savedState) {
                console.log(savedState);
                var source = controller.get('model');
                var sourceCJ = JSON.parse(source.get('responses').primary);
