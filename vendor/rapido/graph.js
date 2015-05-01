@@ -41,13 +41,14 @@ function dblclick(d) {
 }
 
 function dragstart(d) {
+		console.log('force dragstart');
+		console.log(d);
     d3.event.sourceEvent.stopPropagation();
     d3.select(this).classed("fixed", d.fixed = true);
     dragEnabled = true;
 }
 
 function dragend(d) {
-    console.log('dragend');
     dragEnable = false;
 
     var movedEvent = {
@@ -55,9 +56,65 @@ function dragend(d) {
         data : { state: d }
     };
     
-    console.log(movedEvent);
     eventHandler(movedEvent, function(){});                
 }
+
+var orbitalDragOwner = null;
+
+// Drag logic for orbitals
+var orbitalDrag = d3.behavior.drag()
+	.on('dragstart', function() { d3.event.sourceEvent.stopPropagation(); })
+	.on('drag', orbitalDragMove)
+	.on('dragend', orbitalDragEnd);
+
+function orbitalDragMove(d, i) {
+	var transitionCircle = d3.select(this);
+
+	// Check if the mouse cursor is inside the orbit of the parent node
+	var orbit = 
+			d3.select(transitionCircle.node().parentNode.parentNode)
+			.select(".node-orbit");
+	var orbitRadius = orbit.attr('r');
+	
+	if( (d3.event.x * d3.event.x) + (d3.event.y * d3.event.y) > (orbitRadius * orbitRadius) ) {
+		// The circle is outside the orbit, so let the user drag it around the canvas
+		transitionCircle
+			.attr("cx", d3.event.x)
+			.attr("cy", d3.event.y);
+
+		// Determine if the circle is now inside another orbit circle
+		var SVGCoords = d3.mouse(graphSVG.node());
+
+		function pointInCircle(x, y, cx, cy, radius) {
+		  var distancesquared = (x - cx) * (x - cx) + (y - cy) * (y - cy);
+		  return distancesquared <= radius * radius;
+		}
+
+		for( var i = 0; i < linkedNodes.length; i++ ) {
+			// Calculate the radius of this circle
+			var radius = calculateRadius(linkedNodes[i].get('transitions').length);
+
+			if( pointInCircle(SVGCoords[0], SVGCoords[1], linkedNodes[i].x, linkedNodes[i].y, radius) ) {
+				console.log('now located in ' + linkedNodes[i].get('name'));
+			}
+			
+		}
+
+	}else {
+		// The circle is inside the orbit, so allow the user to drag the circle along the orbit
+		var theta = Math.atan2(d3.event.y, d3.event.x);
+		transitionCircle
+			.attr("cx", orbitRadius * Math.cos(theta))
+			.attr("cy", orbitRadius * Math.sin(theta));
+
+		oribtalDragOwner = null;
+	}
+}
+
+function orbitalDragEnd( d ) {
+	var transitionCircle = d3.select(this);
+}
+
 
 /* Calculate the radius distance for orbitals
    based on the nubmer of transitions.  As the transitions grow
@@ -176,7 +233,6 @@ function initGraph(_nodes) {
         idMap[id] = nodes[i];        
         nodes[i].nodeType = 'orphan';
     }
-    console.log(idMap);
     
     links = [];
     // Create links
@@ -416,7 +472,8 @@ function update() {
         
     transitionOrbital
         .append('svg:circle')
-            .attr('class', function(d) { console.log(d); return 'transition ' + d.className;})
+			.call(orbitalDrag)
+            .attr('class', function(d) { return 'transition ' + d.className;})
             .attr('r', 10)
             .attr('cx', function(d,i) { 
                 var source = idMap[d.source];
