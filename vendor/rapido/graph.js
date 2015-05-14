@@ -59,7 +59,8 @@ function dragend(d) {
     eventHandler(movedEvent, function(){});                
 }
 
-var orbitalDragOwner = null;
+var orbitalTargetIndex = -1;
+var orbitTarget;
 
 // Drag logic for orbitals
 var orbitalDrag = d3.behavior.drag()
@@ -68,6 +69,11 @@ var orbitalDrag = d3.behavior.drag()
 	.on('dragend', orbitalDragEnd);
 
 function orbitalDragMove(d, i) {
+	function pointInCircle(x, y, cx, cy, radius) {
+	  var distancesquared = (x - cx) * (x - cx) + (y - cy) * (y - cy);
+	  return distancesquared <= radius * radius;
+	}
+	
 	var transitionCircle = d3.select(this);
 
 	// Check if the mouse cursor is inside the orbit of the parent node
@@ -76,8 +82,8 @@ function orbitalDragMove(d, i) {
 			.select(".node-orbit");
 	var orbitRadius = orbit.attr('r');
 	
-	if( (d3.event.x * d3.event.x) + (d3.event.y * d3.event.y) > (orbitRadius * orbitRadius) ) {
-		// The circle is outside the orbit, so let the user drag it around the canvas
+	if( !pointInCircle(d3.event.x, d3.event.y, 0, 0, orbitRadius ) ) {
+		// The circle is outside the transition source orbit, so let the user drag it around the canvas
 		transitionCircle
 			.attr("cx", d3.event.x)
 			.attr("cy", d3.event.y);
@@ -85,34 +91,62 @@ function orbitalDragMove(d, i) {
 		// Determine if the circle is now inside another orbit circle
 		var SVGCoords = d3.mouse(graphSVG.node());
 
-		function pointInCircle(x, y, cx, cy, radius) {
-		  var distancesquared = (x - cx) * (x - cx) + (y - cy) * (y - cy);
-		  return distancesquared <= radius * radius;
-		}
+		var inCircle = false;
 
 		for( var i = 0; i < linkedNodes.length; i++ ) {
-			// Calculate the radius of this circle
 			var radius = calculateRadius(linkedNodes[i].get('transitions').length);
 
 			if( pointInCircle(SVGCoords[0], SVGCoords[1], linkedNodes[i].x, linkedNodes[i].y, radius) ) {
-				console.log('now located in ' + linkedNodes[i].get('name'));
+				orbitTarget = linkedNodes[i];
+
+					/*
+				if( orbitalTargetIndex != i ) {
+					if( orbitalTargetIndex > 0 ) { linkedNodes[orbitalTargetIndex].highlight = false; }
+					orbitalTargetIndex = i;
+					linkedNodes[orbitalTargetIndex].highlight = true;
+					console.log('update()');
+					console.log('i: ' + i );
+					console.log('orbitalTargetIndex: ' + orbitalTargetIndex);
+					console.log(linkedNodes);
+					update();
+				}
+				*/
+
+				inCircle = true;
 			}
-			
 		}
+		//console.log(inCircle);
+		
+		if( !inCircle && orbitalTargetIndex > 0 ) {
+			linkedNodes[orbitalTargetIndex].highlight = false;
+			orbitalTargetIndex = -1;
+			//update();
+		}
+		
 
 	}else {
-		// The circle is inside the orbit, so allow the user to drag the circle along the orbit
+		// The circle is inside the original orbit, so allow the user to drag the circle along the orbit
 		var theta = Math.atan2(d3.event.y, d3.event.x);
 		transitionCircle
 			.attr("cx", orbitRadius * Math.cos(theta))
 			.attr("cy", orbitRadius * Math.sin(theta));
+		console.log(orbitalTargetIndex);
+		if( orbitalTargetIndex ) {
+			orbitalTargetIndex.highlight = false;
+			oribtalDragOwner = null;
+			update();
+		}
 
-		oribtalDragOwner = null;
 	}
 }
 
 function orbitalDragEnd( d ) {
 	var transitionCircle = d3.select(this);
+
+	console.log(orbitTarget);
+	if( orbitTarget ) { 
+		// The source for this transition has changed, update the data model accordingly
+	}
 }
 
 
@@ -128,7 +162,6 @@ function calculateRadius(numTransitions) {
 function drawHomeNode(container, nodes) {
     
     // If there is no graph, just draw a simple tree layout with a single root node.
-    //TODO: I may switch to a static layout in general as the force directed layout is too unpredictable.
     var tree = d3.layout.tree()
         .size([height, canvasWidth - 160]);
     
@@ -337,6 +370,15 @@ function canvas_dragstarted(d) {
 
     }
     
+	// create a filtered list so that only the non-orphan nodes are rendered in the force directed graph.
+    for( var i = 0; i < nodes.length; i ++ ) {
+        if( nodes[i].nodeType != 'orphan' ) {
+            linkedNodes.push(nodes[i]);
+        } else {
+            orphanNodes.push(nodes[i]);
+        }
+    }
+    
     if( _nodes.length == 1 ) {
         // Draw a single home node
         drawHomeNode(graphSVG, nodes);
@@ -359,22 +401,6 @@ function update() {
     var nodeTarget, nodeTargetIndex;
     var targetIcon;
     var selectedNodeId = "";
-    //console.log(linkedNodes);
-    
-    //force.stop();
-    //linkedNodes = [];
-    orphanNodes = [];
-     // create a filtered list so that only the non-orphan nodes are rendered in the force directed graph.
-    for( var i = 0; i < nodes.length; i ++ ) {
-        if( nodes[i].nodeType != 'orphan' ) {
-            linkedNodes.push(nodes[i]);
-        } else {
-            orphanNodes.push(nodes[i]);
-        }
-    }
-        
-    //console.log(orphanNodes);
-    
         
     /***** D3 Event Handlers *****/
     
@@ -388,19 +414,22 @@ function update() {
 
         // turn off any selections on links or nodes
         path.classed({'incoming': false, 'outgoing': false});
-        
+		d3.selectAll('.node-popup-group').attr('visibility', 'hidden');
+
+		
         var selectEvent = {
             'type' : 'stateSelected',
             'data' : { 'targetId' : '' }
         };
         eventHandler(selectEvent, function(){});  
+		
     });
     
     /***** D3 SVG Definitions *****/
     
     path = path.data(links);
     
-    // add new links
+	// add new links
     path.enter().append('svg:path')
         .attr('class', function(d,i) { var classList = 'link'; if( d.selected) { classList = classList + ' selected'; }  return classList  })
         .style('marker-end', 'url(#end-arrow)')
@@ -411,46 +440,64 @@ function update() {
 
   linkedNodesSVG = linkedNodesSVG.data(linkedNodes, function(d) { if( d.nodeType != 'orphan' ) return d.get('id'); });
   linkedNodesSVG.exit().remove();
-    
+   
   // add new nodes
   linkedNodesSVG.enter()
       .append('svg:g')
       .call(force.drag)
-    .on('click', function(d) { 
+    .on('click', function(d,i) { 
         if( d3.event.defaultPrevented ) {
             // The click event is being surpressed (probably by a drag), so do nothing.
             return;
         }
 
-        selectedNodeId = d.nodeId;
-        
-        var selectEvent = {
-            type : 'stateSelected',
-            data : { id : d.get('id')}
-        };
-        
-        eventHandler(selectEvent, function(){});                
-        
+		// Render a popup window
+		var popupId = '#node-popup-group' + i;
+		d3.selectAll('.node-popup-group').attr('visibility', 'hidden');
+		d3.select(popupId).attr('visibility', 'visible');
+	
         // Stop other click events from propogating
         d3.event.stopPropagation(); 
     });
-    
+  
 	var stateBoxHeight = 30;                          
 	var stateBoxWidth = 140;
 /*	var boxX = -(boxWidth / 2);
 	var boxY = -(boxHeight + 15); */
-	
+
+	graphSVG.append('defs')
+		.append('pattern')
+    .attr('id', 'diagonalHatch')
+    .attr('patternUnits', 'userSpaceOnUse')
+    .attr('width', 4)
+    .attr('height', 4)
+		  .append('path')
+		  .attr('d','M0 5L5 0ZM6 4L4 6ZM-1 1L1 -1Z')
+		  .attr('stroke', '#888')
+		 .attr('stroke-width','1');
+    //.attr('d', 'M-1,1 l2,-2 M0,4 l4,-4 M3,5 l2,-2')
+    //.attr('stroke', 'black')
+    //.attr('stroke-width', 1);
+
     //Background circle for orbiting transitions
     linkedNodesSVG
-        .append('svg:circle')
+		.append('svg:circle')
+		.attr('r', function(d,i) { return calculateRadius(d.get('transitions').length) + 8; })
+		.attr('stroke', 'black')
+		//.attr('fill', 'url(#diagonalHatch)');
+		.attr('fill', 'white');
+
+	/*
+    linkedNodesSVG
+			.append('svg:circle')
             .attr('class', 'node-orbit')
+			.classed('selected', function(d,i) { return d.highlight; } )
             .attr('r',function(d,i) { return calculateRadius(d.get('transitions').length); })
             .on('click', function(d,i) {
                 d3.event.stopPropagation();
                 //TODO: change colour of this state to show that it has been selected.
                 // COmmenting this out because I haven't figured out how to 'de-select' nodes
                 //d3.select(this).classed('selected', true);
-
 
                 path.classed({
                     'outgoing': function(pathData,i) { 
@@ -460,10 +507,8 @@ function update() {
                         if( pathData.target === d ) { return true; }
                     }
                 });
-
-                
             });
-
+*/
     // Transition circle and label.  Draw an orbital for each transition emanating from this node.
     // The path will be drawn in the tick function from the same theta.
     var transitionOrbital = linkedNodesSVG.selectAll('.transition')
@@ -486,6 +531,32 @@ function update() {
                 return (calculateRadius(numTransitions) * Math.sin(d.theta)); 
             });
 
+
+
+	//TODO: the following code uses an initial to describe the transition and is CJ specific.  If I want to keep this mechanism I 
+	// need to make the visualized initial a data attribute that any hypermedia type can use.
+	transitionOrbital
+		.append("text")
+			.attr("fill", "white")
+			.attr("class", "orbital-label")
+			 .attr('x', function(d,i) { 
+                var source = idMap[d.source];
+                var numTransitions = source.get('transitions').length; 
+                return (calculateRadius(numTransitions) * Math.cos(d.theta)) - 2; 
+            })
+            .attr('y', function(d,i) { 
+                var source = idMap[d.source];
+                var numTransitions = source.get('transitions').length; 
+                return (calculateRadius(numTransitions) * Math.sin(d.theta)) + 5; 
+            })
+			.text(function( d ) { 
+					console.log(d); 
+					if( d.className === 'cj-item' ) { return "I" } 
+					else if( d.className === 'cj-query' ) { return "Q" }
+					else if( d.className === 'cj-link' ) { return "L" }
+					else { return d.name } 
+			});
+
     transitionOrbital
         .append("text")
             .attr("x", function(d,i) { 
@@ -502,18 +573,6 @@ function update() {
 			.attr("class", "transition-text")
             .text(function( d ) { return d.name; }); 
        
-    //State rectangle
-	linkedNodesSVG
-        .append("rect")
-        .attr("id", "label")
-        .attr("width", stateBoxWidth )
-        .attr("height", stateBoxHeight )
-        .attr("class", "node-title")
-        .attr("x", -(stateBoxWidth / 2) )
-        .attr("y", -(stateBoxHeight / 2) )
-        .attr("rx",5)
-        .attr("ry",5);
-        
     linkedNodesSVG
             .append("text")
             .attr("x", 0)
@@ -522,8 +581,25 @@ function update() {
 			.attr("class", "node-title-text")
             .text(function( d ) { return d.get('name'); });    
 
-    // Button for creating new transitions from this source state
-    var createLinkButton = linkedNodesSVG
+	// Popup window for node actions
+	var popupWindow = linkedNodesSVG
+		.append('svg:g')
+		.attr('class', 'node-popup-group')
+		.attr('id', function(d,i) { return 'node-popup-group' + i;} )
+		//.attr('visibility', function(d) { if( d.popup ) { return 'visible' } else { return 'hidden' } } );
+		.attr('visibility', 'hidden' );
+	
+	popupWindow
+		.append('svg:rect')
+		.attr('class', 'node-popup')
+		.attr('x', -75)
+		.attr('y', 20)
+		.attr('rx', 10)
+		.attr('ry', 10)
+		.attr('width', 150)
+		.attr('height', 50)
+
+	 var createLinkButton = popupWindow 
             .append('svg:g')
             .on('click', function(d, i) {
                 // Fire an event and let the controller take over.
@@ -536,20 +612,41 @@ function update() {
                 // Stop other click events from propogating
                 d3.event.stopPropagation(); 
             });
+
     createLinkButton
             .append('circle')
             .attr('r', '10')
-            .attr('cx', 0)
-            .attr('cy', -(stateBoxHeight/2) - 15)
+            .attr('cx', -40)
+            .attr('cy', 45)
             .attr('stroke', 'black')
             .attr('fill', 'white');
 
     createLinkButton.append('text')
             .attr('text-anchor', 'middle')
             .text('+')
-            .attr('x', 0)
-            .attr('y', -(stateBoxHeight/2) - 15);
+            .attr('x', -40)
+            //.attr('y', -(stateBoxHeight/2) - 15);
+            .attr('y',49);
 
+	var responseBodyButton = popupWindow
+			.append('svg:g')
+			.on('click', function(d) {
+				var selectEvent = {
+					type : 'stateSelected',
+					data : { id : d.get('id')}
+				};
+        
+				eventHandler(selectEvent, function(){});      
+			});
+
+	responseBodyButton
+			.append('rect')
+			.attr('fill', 'white')
+			.attr('stroke', 'black')
+			.attr('x', 20)
+			.attr('y', 30)
+			.attr('width', 20)
+			.attr('height', 30);
 
     force.start();
 }

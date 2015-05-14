@@ -12,9 +12,18 @@ html, body {
 
 }
 
+.node-popup {
+    fill: white;
+    stroke: black;
+    stroke-width: 2;
+    fill-opacity: 1.0;
+}
+
 .node-title-text {
-	font: 12px sans-serif;
-	fill: white;
+	/*font: 12px sans-serif;*/
+	font-family: 'Cabin Sketch', cursive;
+	font-size: 18px;
+	fill: black;
 	stroke-width: 1;
 	fill-opacity: 1.0;
 }	
@@ -28,8 +37,10 @@ html, body {
 }
 
 .node-orbit {
-    fill: #E3F2FD;
-    fill-opacity: 0.2;
+    /*fill: #E3F2FD;*/
+    /*fill: #E4F0E3;*/
+    /*fill-opacity: 0.2;*/
+    fill: white;
     stroke-width:2;
     stroke:black;
     stroke-dasharray: 5,5;
@@ -37,7 +48,11 @@ html, body {
 }
 
 .node-orbit.selected {
-    fill-opacity: 1.0;
+    fill: yellow;
+}
+
+.orbital-label { 
+    font-family: Georgia, serif;
 }
 
 .link {

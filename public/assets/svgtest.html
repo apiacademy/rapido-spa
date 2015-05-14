@@ -1,0 +1,21 @@
+<html>
+
+<body>
+SVGTest
+<svg>
+<defs>
+  <pattern id="pattern1"
+           x="10" y="10" width="20" height="20"
+           patternUnits="userSpaceOnUse" >
+
+      <circle cx="10" cy="10" r="10" style="stroke: none; fill: #0000ff" />
+
+  </pattern>
+</defs>
+
+<rect x="10" y="10" width="100" height="100"
+    style="stroke: #000000; fill: url(#pattern1);" />    
+</svg>
+
+</body>
+</html>
