@@ -6,10 +6,10 @@
     "tree",
     "document",
     "window",
-    "ace"
+    "-Promise"
   ],
-  "browser" : true,
-  "boss" : true,
+  "browser": true,
+  "boss": true,
   "curly": true,
   "debug": false,
   "devel": true,
@@ -32,5 +32,5 @@
   "white": false,
   "eqnull": true,
   "esnext": true,
-  "unused": "vars"  
+  "unused": true
 }

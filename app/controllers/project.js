@@ -11,6 +11,19 @@ export default Ember.ObjectController.extend({
                 this.transitionToRoute('resources', project.get('id'));
             }
             
-        }
+        },
+       goToVocab: function() {
+           var project = this.get('content');  
+           this.transitionToRoute('project.vocabulary', project.get('id'));
+       },
+       goToExport: function() {
+           var project = this.get('content');  
+           this.transitionToRoute('project.export', project.get('id'));
+       },
+       goToMap: function() {
+           var project = this.get('content');  
+           this.transitionToRoute('maps', project.get('id'));
+
+       }
     }
 });

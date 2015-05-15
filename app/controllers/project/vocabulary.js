@@ -3,6 +3,7 @@ import Ember from "ember";
 export default Ember.ArrayController.extend({
 	stage: 'vocabulary',
 	needs: ['project'],
+    itemController: 'project.word',
 	projectController: Ember.computed.alias("controllers.project"),
 	newVocab: '',
 	actions: {
