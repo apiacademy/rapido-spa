@@ -52,4 +52,3 @@ app.import('vendor/rapido/cj.js');
 app.import('vendor/rapido/hal.js');
 
 module.exports = app.toTree(workers);
-

@@ -4,8 +4,10 @@ module.exports = function(environment) {
   var ENV = {
     contentSecurityPolicy: {
         'default-src': "'self'",
-	'connect-src': "'self' http://localhost:8081",
-	'style-src': "'self' 'unsafe-inline'"
+        'connect-src': "'self' http://localhost:8081",
+        'style-src': "'self' http://fonts.googleapis.com 'unsafe-inline'",
+        'font-src': "'self' http://fonts.gstatic.com",
+        'img-src': "*"
     },
     modulePrefix: 'rapido',
     environment: environment,
@@ -33,25 +35,24 @@ module.exports = function(environment) {
 
   if (environment === 'development') {
     // ENV.APP.LOG_RESOLVER = true;
-    ENV.APP.LOG_ACTIVE_GENERATION = true;
-    // ENV.APP.LOG_TRANSITIONS = true;
+     ENV.APP.LOG_ACTIVE_GENERATION = true;
+     ENV.APP.LOG_TRANSITIONS = true;
     // ENV.APP.LOG_TRANSITIONS_INTERNAL = true;
-    ENV.APP.LOG_VIEW_LOOKUPS = true;
-
-    ENV.backend = 'http://localhost:8081'
+    // ENV.APP.LOG_VIEW_LOOKUPS = true;
+    ENV.backend = 'http://localhost:8081';
   }
 
   if (environment === 'test') {
     // Testem prefers this...
     ENV.baseURL = '/';
-    ENV.locationType = 'auto';
+    ENV.locationType = 'none';
 
     // keep test console output quieter
     ENV.APP.LOG_ACTIVE_GENERATION = false;
     ENV.APP.LOG_VIEW_LOOKUPS = false;
 
     ENV.APP.rootElement = '#ember-testing';
-    ENV.backend = 'http://localhost:8081'
+    ENV.backend = 'http://localhost:8081';
   }
 
   if (environment === 'production') {

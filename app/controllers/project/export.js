@@ -19,7 +19,7 @@ export default Ember.ObjectController.extend({
 			return CRUDtoSwagger(project, this.get('model'));
 		}
 		else if( project.get('contentType') === CollectionJSON.contentType ) {
-            return CollectionJSON.exportModel(this.get('exportSelection'), this.get('model'));
+            return CollectionJSON.exportModel(this.get('exportSelection'), this.get('model').get('content'), project.get('name'), project.get('description'));
         }else {
 			return 'unsupported export type';
 		}
@@ -32,7 +32,6 @@ export default Ember.ObjectController.extend({
         else if( exportSelection === 'Swagger' ) { this.set('aceMode', 'ace/mode/yaml'); }
     }.property('exportSelection'),
 	exportSelectionChanged: function() {
-		console.log(this.exportSelection);
 	}.observes('exportSelection'),
     actions: {     
 	}

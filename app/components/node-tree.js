@@ -27,7 +27,11 @@ export default Ember.Component.extend({
             }
         }
 
+        console.log(resources);
+
 		var root = createTree(resources);
+
+        console.log(root);
 		
 		var graphSVG = d3.select('#canvas')
             .append("svg")
@@ -82,10 +86,29 @@ function createTree(resources) {
     // Create the root node by finding parent-less resources
     resources.forEach(function(resource) {			
         if(!resource.get('parent') ) {
-            root.children.push(resource);
+            root.children.push(cleanResource(resource));
         }
     });
 
 	
 	return root;
+}
+
+function cleanResource(resource) { 
+    var _resource = {
+        id: resource.get('id'),
+        name: resource.get('name'),
+        children: [],
+        methods: resource.get('methods'),
+        get: function(key) {
+            return this[key];
+        }
+    }
+
+    resource.get('children').forEach(function(child) {			
+        _resource.children.push(cleanResource(child));
+    });
+
+
+    return _resource;
 }

@@ -134,13 +134,50 @@ function parse(doc, states, source)  {
 	source.set('transitions', newTransitions);
 }
 
-function exportModel( exportType, states ) {
+function exportModel( exportType, states, projectName, projectDescription ) {
     var ex = '';
-    
+
     if( exportType === 'WADL' ) { 
-        
+        console.log(states);
+    } else if( exportType === 'API Blueprint') {
+
+        function tabify(body) { 
+            var _body = '';
+            var lines = body.split('\n');
+            for( var i = 0; i < lines.length; i++ ) {
+                _body += '        ' + lines[i] + '\n';
+            }
+
+            return _body;
+        }
+
+        ex += "FORMAT: 1A\n"
+        ex = ex + "\n" + "# " + projectName + "\n"
+        ex = projectDescription.length > 0 ? (ex + "\n" + projectDescription) : ex;
+
+        ex += "\n";
+
+        for( var i = 0; i < states.length; i++ ) {
+            var state = states[i];
+
+            ex = ex + "\n" + "# " + state.get('name') + " [/" + state.get('url') + "]";
+			//ex = state.get('description').length > 0 ? (ex + "\n" + state.get('description')) : ex;
+
+            ex += "\n\n";
+
+            ex += "## Read Collection [GET]\n\n";
+            ex += "+ Response 200 (application/vnd.collection+json)\n\n";
+            ex += tabify(state.get('responses').primary);
+            ex += "\n\n";
+            
+            ex += "## Add Item [GET]\n\n";
+            ex += "+ Response 200 (application/vnd.collection+json)\n\n";
+            ex += tabify(state.get('responses').primary);
+            ex += "\n\n";
+        }
     }
-    return exportType;
+    
+    return ex;
 }
 
 /**
@@ -156,8 +193,8 @@ return {
     parse: function(doc, states, source) {
         parse(doc, states, source);
     },
-    exportModel: function( exportType, states ) {
-        return exportModel(exportType, states);
+    exportModel: function( exportType, states, name, description ) {
+        return exportModel(exportType, states, name, description );
     },
 
     name: 'Collection+JSON',

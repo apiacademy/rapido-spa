@@ -117,7 +117,7 @@ var linkTargetDragListener = d3.behavior.drag()
 	
 // The main routine - updates/renders the graph visualization.      
 function initTree(_rootNode) {
-	
+
 	rootNode = _rootNode;
             
     canvasWidth = $('#canvas').width();                
@@ -140,7 +140,7 @@ function initTree(_rootNode) {
 }
 	
 function update(rootNode) {
-		
+
 	// Populate the tree
 	var nodes = tree.nodes(rootNode);
 	links = tree.links(nodes);		
