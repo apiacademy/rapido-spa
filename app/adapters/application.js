@@ -122,6 +122,8 @@ export default DS.Adapter.extend({
         return new Promise(function(resolve,reject) {
             if( type.typeKey === 'project' ) {
                 url = url + '/projects/' + id;
+            }else if( type.typeKey === 'alps' ){
+                url = url + '/alps/' + id;
             }else {
 				reject('find is not supported for record type ' + type);
 			}
@@ -137,9 +139,12 @@ export default DS.Adapter.extend({
 		url = host;
 	
 		return new Promise(function(resolve,reject) {
+                console.log(type.typeKey);
 			if( type.typeKey === 'project' ) {
 				url = url + '/projects';
-			}else {
+			}else if( type.typeKey === 'alp' ) {
+                url = url + '/alps';
+            }else {
 				reject('findAll is not supported for this record type.');
 			}
 
@@ -156,6 +161,9 @@ export default DS.Adapter.extend({
         if( type.typeKey === 'project') {
 			var projectId = query.project;
             url = url + '/projects/' + projectId;
+        } else if( type.typeKey === 'alp') {
+			var projectId = query.project;
+			url = url + '/alps?projectId='+projectId;
         } else if( type.typeKey === 'resource') {
 			var projectId = query.project;
 			url = url + '/projects/' + projectId + '/resources';
@@ -197,6 +205,17 @@ export default DS.Adapter.extend({
                         templates: record.get('templates'),
 					};
 					url = url + '/projects';
+			} else if( type.typeKey === 'alp' ) {
+                    console.log(record.get('source'));
+                    _record = {
+                        alps: {
+                            name: record.get('name'),
+                            description: record.get('description'),
+                            contentType: record.get('contentType'),
+                            source: record.get('source'),
+                        }
+                    };
+                url = url + '/alps';
 			} else if( type.typeKey === 'resource' ) {			
 				var projectId = record.get('project');
 				if( !record.get('project') ) { reject('A parent project identifier property must be present on records of type \'resource\''); }
@@ -256,6 +275,8 @@ export default DS.Adapter.extend({
 		return new Promise(function(resolve,reject) {
             if( type.typeKey === 'project' ) {
                 console.log(record);
+                // merge the ALPS and simple vocabularies into a single list of words
+                var wordList = [];
                 _record = {
                     simpleVocabulary: record.get('simpleVocabulary')
                 }

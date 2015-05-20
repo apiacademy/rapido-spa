@@ -1,4 +1,4 @@
-export default Ember.ObjectController.extend({
+export default Ember.Controller.extend({
 	needs: ['project'],
 	projectController: Ember.computed.alias("controllers.project"),
 	indexedSteps: function() {

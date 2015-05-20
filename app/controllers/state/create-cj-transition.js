@@ -3,7 +3,7 @@ import Ember from "ember";
 //This may not be needed for twitter typeahead
 import HasTypeAheadEditor from '../../mixins/hastypeahead';
 
-export default Ember.ObjectController.extend(HasTypeAheadEditor, {
+export default Ember.Controller.extend(HasTypeAheadEditor, {
 	needs: ['project','states'],
 	projectController: Ember.computed.alias("controllers.project"),
     statesController: Ember.computed.alias('controllers.states'),
@@ -26,7 +26,7 @@ export default Ember.ObjectController.extend(HasTypeAheadEditor, {
         stateNames.push('http://');
         stateNames.push('https://');
         stateNames.push('/');
-        var states = this.get('statesController').model.get('content');
+        var states = this.get('statesController').get('model').get('content');
         //TODO: merge the simple vocab words into this list.
         for( var i =0; i < states.length; i++ ) {
             stateNames.push('$(' + states[i].get('name') + ')');
@@ -76,7 +76,7 @@ console.log(items);
     isLinkValid: function() {
         console.log('isLinkValid?')
             console.log(this.isRelValid());
-        return (this.isRelValid() && this.isLinkValid());
+        return (this.isRelValid() && this.isUrlValid());
     }.property('rel','url'),
     prompt: '',
     actions: {

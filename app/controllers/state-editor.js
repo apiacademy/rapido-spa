@@ -1,7 +1,7 @@
 import Ember from "ember";
 
 
-export default Ember.ObjectController.extend( {    
+export default Ember.Controller.extend( {    
     needs: ['project','states-editor'],
     projectController: Ember.computed.alias('controllers.project'),
     statesController: Ember.computed.alias('controllers.states-editor'),
@@ -59,8 +59,11 @@ export default Ember.ObjectController.extend( {
     suggestions: function() {		
         var suggestionList = [];
 
-        var projectVocabulary = this.get('projectController').model.get('simpleVocabulary');
+        // ALPS vocabularies are added in the Router class
+        suggestionList.push(this.get('projectController').model.get('alps'));
+
         var projectVocabList = { meta: 'vocabulary', words: []};
+        var projectVocabulary = this.get('projectController').model.get('simpleVocabulary');
         for( var i = 0; i < projectVocabulary.length; i++ ) {
             projectVocabList.words.push(projectVocabulary[i]);
         }

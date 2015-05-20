@@ -1,6 +1,6 @@
 import Ember from "ember";
 
-export default Ember.ObjectController.extend( {    
+export default Ember.Controller.extend( {    
     needs: ['project','resources'],
     projectController: Ember.computed.alias('controllers.project'),
     statesController: Ember.computed.alias('controllers.states-editor'),

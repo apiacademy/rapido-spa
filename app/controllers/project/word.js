@@ -1,5 +1,6 @@
 import Ember from "ember";
 
+//* ObjectController is deprecated, but when I convert this class to a Controller the vocab lsit no longer works
 export default Ember.ObjectController.extend({
 	needs: ['project/vocabulary'],
 	isEditing: false,

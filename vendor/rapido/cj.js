@@ -138,7 +138,56 @@ function exportModel( exportType, states, projectName, projectDescription ) {
     var ex = '';
 
     if( exportType === 'WADL' ) { 
-        console.log(states);
+
+            ex+="<?xml version=\"1.0\"?>\n";
+            ex+="<application xmlns=\"http://wadl.dev.java.net/2009/02\">\n";
+            ex+="<resources>\n";
+            
+            for( var i = 0; i < states.length; i++ ) {
+                var state = states[i];
+
+                ex = ex + "<resource path=\"" + "/" + state.get('url') + "\">";
+                ex = ex + "<method name=\"GET\">\n";
+
+            }
+
+        /**
+         *  
+16   <resources base="http://api.search.yahoo.com/NewsSearchService/V1/"> 
+17     <resource path="newsSearch"> 
+18       <method name="GET" id="search"> 
+19         <request> 
+20           <param name="appid" type="xsd:string" 
+21             style="query" required="true"/> 
+22           <param name="query" type="xsd:string" 
+23             style="query" required="true"/> 
+24           <param name="type" style="query" default="all"> 
+25             <option value="all"/> 
+26             <option value="any"/> 
+27             <option value="phrase"/> 
+28           </param> 
+29           <param name="results" style="query" type="xsd:int" default="10"/> 
+30           <param name="start" style="query" type="xsd:int" default="1"/> 
+31           <param name="sort" style="query" default="rank"> 
+32             <option value="rank"/> 
+33             <option value="date"/> 
+34           </param> 
+35           <param name="language" style="query" type="xsd:string"/> 
+36         </request> 
+37         <response status="200"> 
+38           <representation mediaType="application/xml" 
+39             element="yn:ResultSet"/> 
+40         </response> 
+41         <response status="400"> 
+42           <representation mediaType="application/xml" 
+43             element="ya:Error"/> 
+44         </response> 
+45       </method> 
+46     </resource> 
+47   </resources> 
+48 
+49 </application>**/
+
     } else if( exportType === 'API Blueprint') {
 
         function tabify(body) { 
@@ -170,9 +219,16 @@ function exportModel( exportType, states, projectName, projectDescription ) {
             ex += tabify(state.get('responses').primary);
             ex += "\n\n";
             
-            ex += "## Add Item [GET]\n\n";
+            ex += "## Add Item [POST]\n\n";
+            ex += "+ Response 201 (application/vnd.collection+json)\n\n";
+            ex += "\n\n";
+            
+            ex += "## Delete Item [DELETE]\n\n";
             ex += "+ Response 200 (application/vnd.collection+json)\n\n";
-            ex += tabify(state.get('responses').primary);
+            ex += "\n\n";
+            
+            ex += "## Update Item [PUT]\n\n";
+            ex += "+ Response 200 (application/vnd.collection+json)\n\n";
             ex += "\n\n";
         }
     }

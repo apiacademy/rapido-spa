@@ -62,6 +62,9 @@ function dragend(d) {
 var orbitalTargetIndex = -1;
 var orbitTarget;
 
+// Draw a 'shadow' circle to represent where a link source maybe moved to
+//var orbitTargetCursor = 
+
 // Drag logic for orbitals
 var orbitalDrag = d3.behavior.drag()
 	.on('dragstart', function() { d3.event.sourceEvent.stopPropagation(); })
@@ -69,6 +72,7 @@ var orbitalDrag = d3.behavior.drag()
 	.on('dragend', orbitalDragEnd);
 
 function orbitalDragMove(d, i) {
+        console.log('orbitalDragMove');
 	function pointInCircle(x, y, cx, cy, radius) {
 	  var distancesquared = (x - cx) * (x - cx) + (y - cy) * (y - cy);
 	  return distancesquared <= radius * radius;
@@ -77,9 +81,14 @@ function orbitalDragMove(d, i) {
 	var transitionCircle = d3.select(this);
 
 	// Check if the mouse cursor is inside the orbit of the parent node
+	/*var orbit = 
+			d3.select(transitionCircle.node().parentNode.parentNode)
+			.select(".node-orbit");*/
+    console.log(transitionCircle.node().parentNode.parentNode);
 	var orbit = 
 			d3.select(transitionCircle.node().parentNode.parentNode)
 			.select(".node-orbit");
+    console.log(orbit);
 	var orbitRadius = orbit.attr('r');
 	
 	if( !pointInCircle(d3.event.x, d3.event.y, 0, 0, orbitRadius ) ) {
@@ -143,6 +152,8 @@ function orbitalDragMove(d, i) {
 function orbitalDragEnd( d ) {
 	var transitionCircle = d3.select(this);
 
+    // Check if orbitTarget is now inside another state circle
+    // 
 	console.log(orbitTarget);
 	if( orbitTarget ) { 
 		// The source for this transition has changed, update the data model accordingly
@@ -173,29 +184,108 @@ function drawHomeNode(container, nodes) {
       .data(nodes, function(d) {return d.get('id'); })
       .enter().append("g")
       .attr("transform", function(d) { return "translate(" + d.y + (canvasWidth / 2) +  "," + (d.x + 0) + ")"; })
-      .on("click", function(d) { 
+      .on("click", function(d,i) { 
           if( d3.event.defaultPrevented ) {
             // The click event is being surpressed (probably by a drag), so do nothing.
             return;
         }
 
-        var selectEvent = {
-            type : 'stateSelected',
-            data : { id : d.get('id')}
-        };
-        
-        eventHandler(selectEvent, function(){});                
-        
+       	// Render a popup window
+		var popupId = '#node-popup-group' + i;
+		d3.selectAll('.node-popup-group').attr('visibility', 'hidden');
+		d3.select(popupId).attr('visibility', 'visible');
+	
         // Stop other click events from propogating
         d3.event.stopPropagation(); 
       });
 
 
     node.append('svg:circle')
-            .attr('class', 'node-orbit')
+            .attr('fill', 'white')
+            .attr('stroke', 'black')
             .attr('r',100);
 
+    node 
+            .append("text")
+            .attr("x", 0)
+            .attr("y", 8 )
+			.attr("text-anchor", "middle")
+			.attr("class", "node-title-text")
+            .text(function( d ) { return d.get('name'); });  
+
+    	// Popup window for node actions
+	var popupWindow = node 
+		.append('svg:g')
+		.attr('class', 'node-popup-group')
+		.attr('id', function(d,i) { return 'node-popup-group' + i;} )
+		.attr('visibility', 'hidden' );
+
+    popupWindow
+		.append('svg:rect')
+		.attr('class', 'node-popup')
+		.attr('x', -75)
+		.attr('y', 20)
+		.attr('rx', 10)
+		.attr('ry', 10)
+		.attr('width', 150)
+		.attr('height', 50)
+
+     var createLinkButton = popupWindow 
+            .append('svg:g')
+            .on('click', function(d, i) {
+                // Fire an event and let the controller take over.
+                var selectEvent = {
+                    'type' : 'newTransition',
+                    'data' : { 'sourceId' : d.get('id') }
+                };
+                eventHandler(selectEvent, function(){}); 
+
+                // Stop other click events from propogating
+                d3.event.stopPropagation(); 
+            });
+
+    createLinkButton
+            .append('circle')
+            .attr('r', '10')
+            .attr('cx', -40)
+            .attr('cy', 45)
+            .attr('stroke', 'black')
+            .attr('fill', 'white');
+
+     createLinkButton.append('text')
+            .attr('text-anchor', 'middle')
+            .text('+')
+            .attr('x', -40)
+            //.attr('y', -(stateBoxHeight/2) - 15);
+            .attr('y',49);
+
+    var responseBodyButton = popupWindow
+			.append('svg:g')
+			.on('click', function(d) {
+				var selectEvent = {
+					type : 'stateSelected',
+					data : { id : d.get('id')}
+				};
+        
+				eventHandler(selectEvent, function(){});      
+			});
+
+
+    responseBodyButton
+			.append('rect')
+			.attr('fill', 'white')
+			.attr('stroke', 'black')
+			.attr('x', 20)
+			.attr('y', 30)
+			.attr('width', 20)
+			.attr('height', 30);
+
+
+	
+
+
     //State rectangle
+    /*
     node	
         .append("rect")
         .attr("id", "label")
@@ -214,35 +304,7 @@ function drawHomeNode(container, nodes) {
         .attr("text-anchor", "middle")
         .attr("class", "node-title-text")
         .text(function( d ) { return d.get('name'); });    
-
-// Create new node
-    //TODO: Move style attributes to css
-    var createLinkButton = node 
-            .append('svg:g')
-            .on('click', function(d, i) {
-                // Fire an event and let the controller take over.
-                var selectEvent = {
-                    'type' : 'newTransition',
-                    'data' : { 'sourceId' : d.get('id') }
-                };
-                eventHandler(selectEvent, function(){}); 
-
-                d3.event.stopPropagation();
-            });
-    createLinkButton
-            .append('circle')
-            .attr('r', '10')
-            .attr('cx', 0)
-            .attr('cy', -(stateBoxHeight/2) - 15)
-            .attr('stroke', 'black')
-            .attr('fill', 'white');
-
-    createLinkButton.append('text')
-            .attr('text-anchor', 'middle')
-            .text('+')
-            .attr('x', 0)
-            .attr('y', -(stateBoxHeight/2) - 15);
-
+        */
 
 }
         
@@ -482,12 +544,13 @@ function update() {
     //Background circle for orbiting transitions
     linkedNodesSVG
 		.append('svg:circle')
-		.attr('r', function(d,i) { return calculateRadius(d.get('transitions').length) + 8; })
+        .attr('class', 'node-orbit')
+		.attr('r', function(d,i) { return calculateRadius(d.get('transitions').length) })
 		.attr('stroke', 'black')
 		//.attr('fill', 'url(#diagonalHatch)');
 		.attr('fill', 'white');
 
-	/*
+/*	
     linkedNodesSVG
 			.append('svg:circle')
             .attr('class', 'node-orbit')
@@ -508,7 +571,8 @@ function update() {
                     }
                 });
             });
-*/
+            */
+
     // Transition circle and label.  Draw an orbital for each transition emanating from this node.
     // The path will be drawn in the tick function from the same theta.
     var transitionOrbital = linkedNodesSVG.selectAll('.transition')
@@ -535,6 +599,7 @@ function update() {
 
 	//TODO: the following code uses an initial to describe the transition and is CJ specific.  If I want to keep this mechanism I 
 	// need to make the visualized initial a data attribute that any hypermedia type can use.
+    /*
 	transitionOrbital
 		.append("text")
 			.attr("fill", "white")
@@ -556,6 +621,7 @@ function update() {
 					else if( d.className === 'cj-link' ) { return "L" }
 					else { return d.name } 
 			});
+            */
 
     transitionOrbital
         .append("text")
@@ -580,6 +646,8 @@ function update() {
 			.attr("text-anchor", "middle")
 			.attr("class", "node-title-text")
             .text(function( d ) { return d.get('name'); });    
+
+    
 
 	// Popup window for node actions
 	var popupWindow = linkedNodesSVG

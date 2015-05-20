@@ -32,15 +32,15 @@ Router.map(function() {
 		this.resource('__resource', { path: '/resources/:resource_id' }, function() {
 			this.resource('response', { path: '/:response_name' });
 		});
-		this.resource('alps', function() {
-			this.route('create', {path: '/create'});
-			this.resource('profile', { path: '/:alps_profile_id' }, function() {
-				this.route('edit', {path: '/edit'});
-			});
-		});
-		this.resource('maps', {path: '/maps'}, function() {
+		
+        this.resource('maps', {path: '/maps'}, function() {
 			this.resource('map', {path: '/:map_id'});
 		});
+        
+        this.resource('alps', {path: '/alps'}, function() {
+			this.resource('alps-profile', {path: '/:alps_id'});
+		});
+        this.resource('alps-create', {path: '/alps/create'});
 
 		this.route('export', {path: '/export'});		
 		this.route('run', {path: '/engine'});

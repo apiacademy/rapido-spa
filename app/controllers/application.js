@@ -4,7 +4,7 @@ import LoginControllerMixin from 'simple-auth/mixins/login-controller-mixin';
 
 var host = ENV.backend;
 
-export default Ember.ObjectController.extend(LoginControllerMixin, {
+export default Ember.Controller.extend(LoginControllerMixin, {
     authenticator: 'authenticator:rapido',
     content: {},
     typeAheadSuggestions: [],

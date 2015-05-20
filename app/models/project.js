@@ -9,7 +9,8 @@ var Project = DS.Model.extend({
     projectType: DS.attr('string'),
     creationDate: DS.attr('string'),
     responseTemplates: DS.attr(),
-    simpleVocabulary: DS.attr()
+    simpleVocabulary: DS.attr(),
+    alps: DS.attr()
 });
   
 export default Project;

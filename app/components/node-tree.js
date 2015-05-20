@@ -100,6 +100,7 @@ function cleanResource(resource) {
         name: resource.get('name'),
         children: [],
         methods: resource.get('methods'),
+        url: resource.get('url'),
         get: function(key) {
             return this[key];
         }

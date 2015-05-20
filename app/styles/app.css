@@ -43,7 +43,7 @@ html, body {
     fill: white;
     stroke-width:2;
     stroke:black;
-    stroke-dasharray: 5,5;
+    /*stroke-dasharray: 5,5;*/
     stroke-opacity: 0.4;
 }
 
