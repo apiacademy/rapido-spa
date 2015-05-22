@@ -2,8 +2,12 @@ import Ember from "ember";
 
 export default Ember.Component.extend({
     didInsertElement: function() {
+
+        console.log('******************************');
 		
         var states = this.get('state-collection');		
+
+        console.log(states);
 
         // Push the Ember x,y attributes to the top 
         for( var i = 0; i < states.length; i ++ ) {

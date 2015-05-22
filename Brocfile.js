@@ -51,4 +51,6 @@ app.import('vendor/rapido/graph.js');
 app.import('vendor/rapido/cj.js');
 app.import('vendor/rapido/hal.js');
 
+app.import('bower_components/html2canvas/build/html2canvas.min.js');
+
 module.exports = app.toTree(workers);

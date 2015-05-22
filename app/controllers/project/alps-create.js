@@ -14,14 +14,20 @@ export default Ember.Controller.extend( {
     dirtyBody: '',
     name: '',
     description: '',
+    isNameValid: function(){
+        if( this.get('name').length > 0 ) {
+            return true;
+        }else {
+            return false;
+        }
+    }.property('name'),
+    isButtonDisabled:  Ember.computed.not('isNameValid'),
 
     actions: {
         updated: function(newValue) {
             this.set('dirtyBody', newValue);
         },
         save: function() {
-                console.log('****');
-            console.log(this.get('dirtyBody'));
             var newALPSProfile = this.store.createRecord('alps', {
                 name: this.get('name'),
                 description: this.get('description'),
@@ -29,9 +35,15 @@ export default Ember.Controller.extend( {
                 source: this.get('dirtyBody')
             });
 
-            newALPSProfile.save();
-            this.transitionToRoute('alps');
-
+            newALPSProfile.save().then(
+                function(newProfile) { 
+                    this.transitionToRoute('alps');
+                }, 
+                function(newProfile) {
+                    console.log('there was an error');
+                    console.log('how should we tell the user?');
+                }
+            );
         }
     }
 });

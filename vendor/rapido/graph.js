@@ -170,154 +170,27 @@ function calculateRadius(numTransitions) {
     return 80 + 4 * numTransitions;
 }
 
-function drawHomeNode(container, nodes) {
-    
-    // If there is no graph, just draw a simple tree layout with a single root node.
-    var tree = d3.layout.tree()
-        .size([height, canvasWidth - 160]);
-    
-    var nodes  = tree.nodes(nodes[0]);
-	var stateBoxHeight = 30;                          
-	var stateBoxWidth = 140;
-
-    var node = container.selectAll(".tree-node")
-      .data(nodes, function(d) {return d.get('id'); })
-      .enter().append("g")
-      .attr("transform", function(d) { return "translate(" + d.y + (canvasWidth / 2) +  "," + (d.x + 0) + ")"; })
-      .on("click", function(d,i) { 
-          if( d3.event.defaultPrevented ) {
-            // The click event is being surpressed (probably by a drag), so do nothing.
-            return;
-        }
-
-       	// Render a popup window
-		var popupId = '#node-popup-group' + i;
-		d3.selectAll('.node-popup-group').attr('visibility', 'hidden');
-		d3.select(popupId).attr('visibility', 'visible');
-	
-        // Stop other click events from propogating
-        d3.event.stopPropagation(); 
-      });
-
-
-    node.append('svg:circle')
-            .attr('fill', 'white')
-            .attr('stroke', 'black')
-            .attr('r',100);
-
-    node 
-            .append("text")
-            .attr("x", 0)
-            .attr("y", 8 )
-			.attr("text-anchor", "middle")
-			.attr("class", "node-title-text")
-            .text(function( d ) { return d.get('name'); });  
-
-    	// Popup window for node actions
-	var popupWindow = node 
-		.append('svg:g')
-		.attr('class', 'node-popup-group')
-		.attr('id', function(d,i) { return 'node-popup-group' + i;} )
-		.attr('visibility', 'hidden' );
-
-    popupWindow
-		.append('svg:rect')
-		.attr('class', 'node-popup')
-		.attr('x', -75)
-		.attr('y', 20)
-		.attr('rx', 10)
-		.attr('ry', 10)
-		.attr('width', 150)
-		.attr('height', 50)
-
-     var createLinkButton = popupWindow 
-            .append('svg:g')
-            .on('click', function(d, i) {
-                // Fire an event and let the controller take over.
-                var selectEvent = {
-                    'type' : 'newTransition',
-                    'data' : { 'sourceId' : d.get('id') }
-                };
-                eventHandler(selectEvent, function(){}); 
-
-                // Stop other click events from propogating
-                d3.event.stopPropagation(); 
-            });
-
-    createLinkButton
-            .append('circle')
-            .attr('r', '10')
-            .attr('cx', -40)
-            .attr('cy', 45)
-            .attr('stroke', 'black')
-            .attr('fill', 'white');
-
-     createLinkButton.append('text')
-            .attr('text-anchor', 'middle')
-            .text('+')
-            .attr('x', -40)
-            //.attr('y', -(stateBoxHeight/2) - 15);
-            .attr('y',49);
-
-    var responseBodyButton = popupWindow
-			.append('svg:g')
-			.on('click', function(d) {
-				var selectEvent = {
-					type : 'stateSelected',
-					data : { id : d.get('id')}
-				};
-        
-				eventHandler(selectEvent, function(){});      
-			});
-
-
-    responseBodyButton
-			.append('rect')
-			.attr('fill', 'white')
-			.attr('stroke', 'black')
-			.attr('x', 20)
-			.attr('y', 30)
-			.attr('width', 20)
-			.attr('height', 30);
-
-
-	
-
-
-    //State rectangle
-    /*
-    node	
-        .append("rect")
-        .attr("id", "label")
-        .attr("width", stateBoxWidth )
-        .attr("height", stateBoxHeight )
-        .attr("class", "node-title")
-        .attr("x", -(stateBoxWidth/2))
-        .attr("y", 0 )
-        .attr("rx",5)
-        .attr("ry",5);
-        
-       node 
-        .append("text")
-        .attr("x", 0)
-        .attr("y", 8 )
-        .attr("text-anchor", "middle")
-        .attr("class", "node-title-text")
-        .text(function( d ) { return d.get('name'); });    
-        */
-
-}
-        
- 
 // The main routine - updates/renders the graph visualization.      
 function initGraph(_nodes) {
 
     if( !_nodes || _nodes.length <= 0 ) { 
         console.warn('no nodes to render.');
-        return;
     } 
-    
-    nodes = _nodes;
+
+    // Create a static root node for the graph
+    var rootNodeArray = [{
+        id: 'root',
+        nodeType: 'root',
+        transitions: [],
+        get: function(propName) {
+            return this[propName];
+        }
+    }]
+
+    // Create transitions from the root node
+    //TODO: How do I represent 'home' nodes?
+
+    nodes = rootNodeArray.concat(_nodes);
     idMap = {};    
     
     // Convert the application dataset into something that we can use with d3
@@ -326,7 +199,7 @@ function initGraph(_nodes) {
     for( var i = 0; i < nodes.length; i++ ) {        
         var id = nodes[i].get('id');
         idMap[id] = nodes[i];        
-        nodes[i].nodeType = 'orphan';
+        nodes[i].nodeType = nodes[i].nodeType === 'root' ? 'root' : 'orphan';
     }
     
     links = [];
@@ -440,13 +313,17 @@ function canvas_dragstarted(d) {
             orphanNodes.push(nodes[i]);
         }
     }
-    
+
+    update();
+   
+   /* 
     if( _nodes.length == 1 ) {
         // Draw a single home node
         drawHomeNode(graphSVG, nodes);
     }else {
         update();
     }
+    */
 
 }
     
@@ -544,8 +421,17 @@ function update() {
     //Background circle for orbiting transitions
     linkedNodesSVG
 		.append('svg:circle')
-        .attr('class', 'node-orbit')
-		.attr('r', function(d,i) { return calculateRadius(d.get('transitions').length) })
+        .attr('class', function(d,i) {
+            if( d.nodeType === 'root' ) { return 'node-root'; }
+            else { return 'node-orbit'; }
+        })
+		.attr('r', function(d,i) { 
+            if( d.nodeType === 'root' ) {
+                return 10;
+            }else {
+                return calculateRadius(d.get('transitions').length);
+            }
+        })
 		.attr('stroke', 'black')
 		//.attr('fill', 'url(#diagonalHatch)');
 		.attr('fill', 'white');

@@ -1,19 +1,11 @@
 <div class="row">
-    <div class="col-md-9"><h2>{{model.name}}</h2><p>{{model.description}}</p></div>
-    <div class="col-md-2 pull-right">
-        <div class="btn-group">
-            <button type="button" class="btn btn-warning" {{action 'cancel'}}>Cancel</button>
-            <button type="button" class="btn btn-success" {{action 'save'}}>Save</button>
-        </div>
-    </div>
-     <div class="col-md-12" id="editor">
-        {{ace-editor 
-						text=responseBody 
-						mode=aceMode 
-						typeAheadSuggestions=suggestions 
-                        nodeList=stateNames
-						typeAheadAction="setTypeAheadList"  
-						onChangeAction="responseUpdated"  
-						suggestionClicked=suggestion}}
-    </div>
+<div class="col-md-12">
+<h3>ALPS Profiles</h3>
+<table class="table">
+{{#each alps in model}}
+<tr><td>{{alps.name}}</td><td><button class="btn btn-default" type="submit">Delete</button></td></tr>
+{{/each}}
+</table>
+{{#link-to 'project.alps-create'}}New ALPS Profile...{{/link-to}}
+</div>
 </div>

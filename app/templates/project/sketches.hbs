@@ -1,0 +1,9 @@
+{{#each model}}
+{{#link-to controller.routeName id}}
+<div>
+    {{name}}
+</div>
+{{/link-to}}
+{{/each}}
+
+<button {{action 'screenshot'}}>Screenshot</button>

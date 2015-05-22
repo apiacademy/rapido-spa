@@ -7,49 +7,22 @@ var Router = Ember.Router.extend({
 
 Router.map(function() {
 
-    this.resource('debug', function() { path: '/debug'});
+    this.route('projects', function() {} );
 
-	this.resource('projects', function() {});
+    this.route('project', { path: '/:project_id' }, function() {
+        this.route('vocabulary', { path: '/vocab' } );
+        this.route('sketches', { path: '/sketches' } );
+        this.route('export', { path: '/export' } );
 
-	this.resource('project', { path: '/:project_id'}, function() {       
-		this.resource('start');
-
-		this.resource('resources', function() {
-			//Removing nesting because the templates will not be nested.
-			//this.resource('resource', { path: '/:resource_id' });
-		});
-		this.resource('resources-editor', function() {
-			this.resource('resource', { path: '/:resource_id' });
-		}); 
-		this.resource('states', function() {
-            this.resource('state', { path: '/:state_id' }, function() {
-                this.route('create-cj-transition', {path: '/cj-create'});
-            });
-		});
-        this.resource('states-editor', function() {
-            this.resource('state-editor', { path: '/:state_id' } );
+        this.route('alps', { path: '/alps' }, function() {
         });
-		this.resource('__resource', { path: '/resources/:resource_id' }, function() {
-			this.resource('response', { path: '/:response_name' });
-		});
-		
-        this.resource('maps', {path: '/maps'}, function() {
-			this.resource('map', {path: '/:map_id'});
-		});
-        
-        this.resource('alps', {path: '/alps'}, function() {
-			this.resource('alps-profile', {path: '/:alps_id'});
-		});
-        this.resource('alps-create', {path: '/alps/create'});
+        this.route('alps-create', { path: '/alps/create'} );
+    });
 
-		this.route('export', {path: '/export'});		
-		this.route('run', {path: '/engine'});
-		this.route('vocabulary', {path: '/vocab'});
-		this.route('editor', {path: '/explore'});
-	});
+    this.route('sketch', { path: '/sketches/:sketch_id' }, function() {
+        this.route('graph', { path: '/graph' } );
+    });
 
-
-	
 });
 
 export default Router;

@@ -1,6 +1,6 @@
 import DS from "ember-data";
  
-var State = DS.Model.extend({
+var Hypernode = DS.Model.extend({
     project: DS.attr('string'),
     name: DS.attr('string'),
     description: DS.attr('string'),
@@ -13,4 +13,4 @@ var State = DS.Model.extend({
 
 //responses: a hash object of responses.  Using a hash for future extensions.  Use the key 'primary' for now.
   
-export default State;
+export default Hypernode;

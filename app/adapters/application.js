@@ -119,27 +119,33 @@ function deleteObject(token, url, callback) {
 export default DS.Adapter.extend({	
     find: function(store, type, id ) {
 		url = host;
+        console.log('find');
+        console.log(type);
         return new Promise(function(resolve,reject) {
             if( type.typeKey === 'project' ) {
                 url = url + '/projects/' + id;
+            }else if( type.typeKey === 'sketch' ) { 
+                url = url + '/sketches/' + id;
             }else if( type.typeKey === 'alps' ){
                 url = url + '/alps/' + id;
             }else {
 				reject('find is not supported for record type ' + type);
 			}
-			
+
             getObjects(url, function(error, result) {
-				if( error === null ) { resolve(result[0]); } 
-				else { reject(error); }
+				if( !error  ) { 
+                    resolve(result); 
+                } else { 
+                    reject(error); 
+                }
 			});
         });
     },
 	findAll: function(store, type, sinceToken) {
-
 		url = host;
+        console.log('findAll');
 	
 		return new Promise(function(resolve,reject) {
-                console.log(type.typeKey);
 			if( type.typeKey === 'project' ) {
 				url = url + '/projects';
 			}else if( type.typeKey === 'alp' ) {
@@ -161,15 +167,18 @@ export default DS.Adapter.extend({
         if( type.typeKey === 'project') {
 			var projectId = query.project;
             url = url + '/projects/' + projectId;
+        } else if( type.typeKey === 'sketch' ) {
+			var projectId = query.project;
+            url = url + '/projects/' + projectId + '/sketches';
         } else if( type.typeKey === 'alp') {
 			var projectId = query.project;
 			url = url + '/alps?projectId='+projectId;
         } else if( type.typeKey === 'resource') {
 			var projectId = query.project;
 			url = url + '/projects/' + projectId + '/resources';
-		} else if ( type.typeKey === 'state' ) {
-			var projectId = query.project;
-			url = url + '/projects/' + projectId + '/states';
+		} else if ( type.typeKey === 'hypernode' ) {
+			var sketchId = query.sketch;
+			url = url + '/sketches/' + sketchId + '/hypernodes';
 		} else if ( type.typeKey === 'map' ) { 
             console.log('looking for maps');
             var projectId = query.project;

@@ -3,6 +3,7 @@ import AuthenticatedRouteMixin from 'simple-auth/mixins/authenticated-route-mixi
 
 export default Ember.Route.extend(AuthenticatedRouteMixin, {
 	model: function() {
+        console.log('projects model');
 		return this.store.find('project');
 	}
 });

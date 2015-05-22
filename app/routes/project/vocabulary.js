@@ -2,6 +2,7 @@ import Ember from "ember";
 
 export default Ember.Route.extend({
 	model: function() {
+        console.log('***** In project.vocabulary route *****');
 		var route = this;
 		return new Promise(function(resolve, reject) {
 			var project = route.modelFor('project');

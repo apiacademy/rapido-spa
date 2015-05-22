@@ -10,7 +10,6 @@ export default Ember.ArrayController.extend({
     }.property(),
     actions: {
         stateSelected: function(id) {
-            console.log(id);
             if( !id ) {
                 // The user probably clicked on the canvas.  Treat this as a cancel or unselect and send them to the collection
                 this.transitionToRoute('states');

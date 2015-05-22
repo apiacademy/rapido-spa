@@ -44,16 +44,18 @@ export default Base.extend({
   },
   invalidate: function(data) {
       return new Promise(function(resolve,reject){ 
-           var loginRequest = $.ajax({
+          console.log('inside invalidate function');
+           var logoutRequest = $.ajax({
             url: host + '/logout',
             type: 'POST'
         });
 
-        loginRequest.done( function( data, textStatus, jqXHR ) {                    
+        logoutRequest.done( function( data, textStatus, jqXHR ) {                    
             resolve({token:data.token});
         });
 
-        loginRequest.fail( function( data, textStatus, jqXHR ) {
+        logoutRequest.fail( function( data, textStatus, jqXHR ) {
+            console.log('logout request failed');
             reject(textStatus);
         });
 

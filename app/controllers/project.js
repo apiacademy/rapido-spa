@@ -6,9 +6,9 @@ export default Ember.Controller.extend({
 			var project = this.get('content');  
 
             if( project.get('projectType') === 'hypermedia' ) {
-                this.transitionToRoute('states', project.get('id'));
+                this.transitionToRoute('project.states', project.get('id'));
             } else {
-                this.transitionToRoute('resources', project.get('id'));
+                this.transitionToRoute('project.resources', project.get('id'));
             }
             
         },

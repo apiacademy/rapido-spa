@@ -8,7 +8,6 @@ var Project = DS.Model.extend({
     contentType: DS.attr('string'),
     projectType: DS.attr('string'),
     creationDate: DS.attr('string'),
-    responseTemplates: DS.attr(),
     simpleVocabulary: DS.attr(),
     alps: DS.attr()
 });

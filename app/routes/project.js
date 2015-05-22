@@ -1,8 +1,10 @@
 import Ember from "ember";
 
 export default Ember.Route.extend({
+    /*
     afterModel: function(model, transition) {
         console.log(model);
+        console.log('in afterModel');
 
         var thisRoute = this;
 
@@ -26,6 +28,7 @@ export default Ember.Route.extend({
 
         return promise;
     },
+    */
 	model: function(params) {
 		return this.store.find('project', params.project_id);
 	},
