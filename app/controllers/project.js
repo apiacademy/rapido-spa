@@ -4,13 +4,7 @@ export default Ember.Controller.extend({
     actions: {
         goToSketch: function() {
 			var project = this.get('content');  
-
-            if( project.get('projectType') === 'hypermedia' ) {
-                this.transitionToRoute('project.states', project.get('id'));
-            } else {
-                this.transitionToRoute('project.resources', project.get('id'));
-            }
-            
+            this.transitionToRoute('project.sketches', project.get('id'));
         },
        goToVocab: function() {
            var project = this.get('content');  

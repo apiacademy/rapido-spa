@@ -1,0 +1,72 @@
+<div class="row">
+    <div class="col-md-9"><h2>{{model.name}} Response</h2><p>{{model.description}}</p></div>
+    <div class="col-md-2 pull-right">
+        {{#if isDirty}}
+        <div class="btn-group">
+            <button type="button" class="btn btn-success" {{action 'save'}}>Save</button>
+            <button type="button" class="btn btn-danger" {{action 'delete'}}>Delete</button>
+        </div>
+        {{/if}}
+    </div>
+</div>
+<div>{{#each suggestions}}{{this.id}}{{/each}}</div>
+<div class="row">   
+    <div class="col-md-10">
+        <div class="row">
+            <div class="col-md-12">
+                Content-Type:
+                <div id="scrollable-dropdown-menu">
+                    <!--<input class="typeahead" type="text" placeholder="Content-Type">-->
+                  {{input value=model.contentType}}
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12" id="editor">
+        {{ace-editor 
+						text=responseBody 
+						mode=aceMode 
+						typeAheadSuggestions=suggestions 
+                        nodeList=stateNames
+						typeAheadAction="setTypeAheadList"  
+						onChangeAction="responseUpdated"  
+						suggestionClicked=suggestion}}
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div><h3>Outbound Links</h3></div>
+       {{#each outboundLinks}}
+       <div>{{#link-to href id}}{{name}}{{/link-to}}</div>
+       {{/each}}
+    </div>
+</div>
+
+<div class="modal fade" id="delete-confirm">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header alert-warning">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Are you sure you want to delete '{{model.name}}'?</h4>
+      </div>
+          {{#if hasChildren}}
+      <div class="modal-body alert-warning">
+          <p>In addition to deleting <i>{{model.name}}</i>, the following nodes may become orphans:</p>
+          <ul>
+          {{#each orphanNodes}}
+          <li>{{this}}</li>
+          {{/each}}
+          </ul>
+      </div>
+          {{/if}}
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-danger" data-dismiss="modal" {{action 'deleteConfirmed'}}>Yes, delete this node!</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+
+
+

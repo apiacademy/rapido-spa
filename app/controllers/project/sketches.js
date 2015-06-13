@@ -1,7 +1,9 @@
 import Ember from "ember";
 
+//TODO: re-route the user to the most recent sketch (or sketch last opened)
+
 export default Ember.Controller.extend({
-    routeName: 'sketch.graph',
+    routeName: 'project.sketch.graph',
     actions: {
         screenshot: function() {
             html2canvas(document.body, {

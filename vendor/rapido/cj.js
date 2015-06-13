@@ -236,6 +236,63 @@ function exportModel( exportType, states, projectName, projectDescription ) {
     return ex;
 }
 
+function createBody(hyperNode) {
+    // Create an empty body
+    var CJBody = {};
+    CJBody.collection = {};
+    CJBody.collection.version = "1.0";
+    CJBody.collection.href = hyperNode.get('url');
+    CJBody.collection.items = [];
+    CJBody.collection.links = [];
+    CJBody.collection.queries = [];
+    CJBody.collection.template = {};
+
+    return CJBody;
+
+}
+
+function create(hyperNode, store) {
+    
+    var promise = new Ember.RSVP.Promise(function(resolve, reject) {
+    
+        var CJBody = createBody(hyperNode);
+        hyperNode.set('body', JSON.stringify(CJBody, null, '    ') );
+
+    // Create a CREATE item response node automatically
+        /*
+    var CJBody = createBody(hyperNode);
+    var name = 'Create ' + hyperNode.get('name');
+    var createResponseNode = store.createRecord('hypernode',
+    {
+        sketch: hyperNode.get('sketch'),
+        name: name,
+        contentType: '',
+        url: '$(' + name + ')',
+        body: '',
+        method: 'POST',
+        statusCode: '201'
+    });
+
+    createResponseNode.save().then(function(savedNode) {
+        console.log(savedNode);
+        console.log(savedNode.id);
+        hyperNode.set('body', JSON.stringify(CJBody, null, '    ') );
+        var transitions = hyperNode.get('transitions');
+        console.log(transitions);
+        if( !transitions ) { transitions = []; }
+        transitions.push( { target: savedNode.id } );
+        console.log(transitions);
+        hyperNode.set('transitions', transitions);
+        console.log(hyperNode.get('transitions'));
+        console.log(hyperNode);
+        resolve(hyperNode);
+    });*/
+        
+});
+    return promise;
+            
+}
+
 /**
   Class names:
   cj-link
@@ -245,7 +302,13 @@ function exportModel( exportType, states, projectName, projectDescription ) {
   cj-item-query
   **/
     
-return {    
+return {
+    createBody: function(hyperNode) {
+        return createBody(hyperNode);
+    },
+    generate: function(hyperNode, store) {
+        return create(hyperNode, store);
+    },
     parse: function(doc, states, source) {
         parse(doc, states, source);
     },

@@ -25,7 +25,6 @@ export default Ember.ArrayController.extend({
     
     actions: {
         createProject: function() {
-            console.log(this.get('newProjectHostname'));
             var newProject = this.store.createRecord('project', {
 				name: this.get('newProjectName'),
                 description: this.get('newProjectDescription'),

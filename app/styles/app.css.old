@@ -1,0 +1,268 @@
+html, body {
+  margin: 20px;
+}
+
+.node-title { 
+    stroke-width: 2;
+    stroke: black;
+    /*fill: #FAECC3;*/
+    fill: #0D47A1;
+    fill-opacity: 1.0;
+    cursor: pointer;
+
+}
+
+.node-popup {
+    fill: white;
+    stroke: black;
+    stroke-width: 2;
+    fill-opacity: 1.0;
+}
+
+.node-title-text {
+	/*font: 12px sans-serif;*/
+	font-family: 'Cabin Sketch', cursive;
+	font-size: 18px;
+	fill: black;
+	stroke-width: 1;
+	fill-opacity: 1.0;
+}	
+
+.node-uri { 
+    stroke-width: 2;
+    stroke: black;
+    fill: #FFFFFF;      
+    fill-opacity: 1.0;
+    cursor: pointer;
+}
+
+.node-root { 
+    fill: black;
+    stroke: black;
+}
+.node-orbit {
+    fill: white;
+    stroke-width:2;
+    stroke:black;
+    stroke-opacity: 0.4;
+}
+
+.node-orbit.selected {
+    fill: yellow;
+}
+
+.orbital-label { 
+    font-family: Georgia, serif;
+}
+
+.link {
+  stroke:gray;
+  stroke-width: 1px;
+  stroke-opacity:1;
+    cursor: pointer;
+}
+
+.link.incoming {
+  stroke: red;
+  stroke-width: 6px;
+  stroke-dasharray: 5,5;
+}
+
+.link.outgoing {
+    stroke: blue;
+    stroke-width: 6px;
+}
+
+.transition {
+    fill: #448AFF;
+}
+
+.transition-text {
+    fill: black;
+}
+
+/* Media Type plugin styles */
+.help-panel {
+    background: gray;
+    opacity: 1.0;
+}
+.create-transition-wizard {
+    border-bottom-style: solid;
+    border-color: #0D47A1;
+    //background:  #E3F2FD; 
+    background:  #FFFFFF; 
+    position: absolute; 
+    width: 100%;
+    opacity: 0.9;
+}
+
+.create-transition-wizard span {
+    padding: 0 5em 0 5em;
+}
+
+/* tree designer styles */
+
+.tree-node {
+  font: 10px sans-serif;
+}
+
+.tree-link {
+  fill: none;
+  stroke: #ccc;
+  stroke-width: 3.5px;
+}
+
+
+.tree-node-name {
+    fill: #FAECC3;
+    stroke: black;
+    stroke-width: 2;
+}
+
+.dynamic {
+    stroke-width: 3;
+    stroke-dasharray: 10 5;
+}
+
+.tree-node-name-text {
+    fill: black;
+    stroke: black;
+	font: 18px sans-serif;
+}
+
+.tree-node-method { 
+    stroke-width: 2;
+    stroke: black;
+    fill-opacity: 0.8;
+}
+
+.tree-node-method-text {     
+	stroke-width: 1;
+	fill: white;
+    font: 10px sans-serif;
+}
+
+
+
+.tree-node circle {
+  fill: #fff;
+  stroke: #6F198C;
+  stroke-width: 3.0px;
+}
+
+#small-circle {
+  stroke-width: 1.0px;
+  fill-opacity: 0.4;
+  fill: gray;
+	stroke: gray;
+}
+
+.GET {
+	fill: #0A52A8;      	
+}
+.PUT { 
+    fill: #B97417;          
+}
+.POST {
+	fill: #109A36;
+}
+.DELETE {
+	fill: #930C16;
+}
+
+/* Vocabulary Styles */
+#vocab-list {
+	margin: 0 0 0.5em 1.0em;
+	padding: 1.0em 0 0 0;
+	list-style: none;
+}
+
+#vocab-list li {
+	position: relative;
+	font-size: 22px;
+	border-bottom: 1px dotted #ccc;
+}
+
+#new-vocab {
+	position: relative;
+	margin: 0 0 0.5em 0;
+	width: 20.0em;
+	font-size: 24px;
+	font-family: inherit;
+	line-height: 1.4em;
+	border: 0;
+	outline: none;
+	color: inherit;
+	padding: 6px;
+	
+	border: 1px solid #999;
+	box-shadow: inset 0 -1px 5px 0 rgba(0, 0, 0, 0.2);
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-ms-box-sizing: border-box;
+	-o-box-sizing: border-box;
+	box-sizing: border-box;
+	-webkit-font-smoothing: antialiased;
+	-moz-font-smoothing: antialiased;
+	-ms-font-smoothing: antialiased;
+	-o-font-smoothing: antialiased;
+	font-smoothing: antialiased;
+}
+
+/** Wizard Pages **/
+.wizard-header {
+}
+
+.navbar-default { 
+    background-color: rgba(0,0,0,0);
+    border-color: rgba(0,0,0,0);
+}
+
+/** Design Maps **/
+
+.map-steps {
+	background:#C7CFFC;
+	width:20.0em;
+	height:15.0em;
+	text-align:left;
+	vertical-align:top;
+	padding:1em 1.5em 1em 1.5em;
+	margin-right:1.5em;
+	margin-bottom:0.8em;
+	font-family: "Lucida Bright", Georgia, serif;	
+}
+
+.map-questions {
+	background:#FCF4C7;
+}
+
+.map-comments {
+	background:#D5E8CF;
+}
+
+.map-ideas {
+	background:#FACDCD;
+}
+
+
+/* Hypermedia css */
+/* I may split this out into specific media type css files */
+.cj-link { 
+    fill: blue;
+}
+
+.cj-query { 
+    fill: purple;
+}
+
+.cj-item { 
+    fill: green;
+}
+
+.plus-icon {
+    background-color: black;
+    background-image: url("http://localhost:4200/assets/images/plus-small.png");
+    background-position: 1px;1px;
+    background-repeat: no-repeat;
+    display: inline-block;
+}

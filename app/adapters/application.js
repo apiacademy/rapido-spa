@@ -16,7 +16,7 @@ var record;
  * @token {string} ???
  * @url {string} full resource path
  */
-function createObject(token, url, data, callback) {
+function createObject(url, data, callback) {
     var createAJAX = $.ajax({
         url: url,
         type: 'POST',                    
@@ -62,16 +62,12 @@ function getObjects(url, callback) {
  * @token {string} ???
  * @url {string} full resource path
  */
-function updateObject(token, url, data, callback) {
+function updateObject(url, data, callback) {
     var createAJAX = $.ajax({
         url: url,
         type: 'PUT',                    
         contentType : 'application/json',
-        data: JSON.stringify(data),
-        beforeSend: function( request ) {
-            var bearerAuthString = 'Bearer ' + token;
-            request.setRequestHeader("Authorization", bearerAuthString);
-        }
+        data: JSON.stringify(data)
     });
                 
     createAJAX.done( function( response, textStatus, jqXHR ) {                    
@@ -92,14 +88,10 @@ function updateObject(token, url, data, callback) {
  * @return {Promise} promise
  */
 
-function deleteObject(token, url, callback) {    
+function deleteObject(url, callback) {    
     var getAJAX = $.ajax({
         url: url,
-        type: 'DELETE',                    
-        beforeSend: function( request ) {
-            var bearerAuthString = 'Bearer ' + token;                    
-            request.setRequestHeader("Authorization", bearerAuthString);
-        }
+        type: 'DELETE'                    
     });
                 
     getAJAX.done( function( data, textStatus, jqXHR ) {                                 
@@ -119,8 +111,6 @@ function deleteObject(token, url, callback) {
 export default DS.Adapter.extend({	
     find: function(store, type, id ) {
 		url = host;
-        console.log('find');
-        console.log(type);
         return new Promise(function(resolve,reject) {
             if( type.typeKey === 'project' ) {
                 url = url + '/projects/' + id;
@@ -128,6 +118,8 @@ export default DS.Adapter.extend({
                 url = url + '/sketches/' + id;
             }else if( type.typeKey === 'alps' ){
                 url = url + '/alps/' + id;
+            }else if( type.typeKey === 'hypernode' ){
+                url = url + '/hypernodes/' + id;
             }else {
 				reject('find is not supported for record type ' + type);
 			}
@@ -143,7 +135,6 @@ export default DS.Adapter.extend({
     },
 	findAll: function(store, type, sinceToken) {
 		url = host;
-        console.log('findAll');
 	
 		return new Promise(function(resolve,reject) {
 			if( type.typeKey === 'project' ) {
@@ -177,10 +168,8 @@ export default DS.Adapter.extend({
 			var projectId = query.project;
 			url = url + '/projects/' + projectId + '/resources';
 		} else if ( type.typeKey === 'hypernode' ) {
-			var sketchId = query.sketch;
-			url = url + '/sketches/' + sketchId + '/hypernodes';
+            url = url + '/sketches/' + query.sketch + '/hypernodes';
 		} else if ( type.typeKey === 'map' ) { 
-            console.log('looking for maps');
             var projectId = query.project;
             url = url + '/projects/' + projectId + '/maps';
         } else {
@@ -190,78 +179,93 @@ export default DS.Adapter.extend({
 
 		return new Promise(function(resolve,reject) {
 			getObjects(url, function(error, result) {
-				if( error === null ) { resolve(result); } 
-				else { reject(error); }
+                if( error ) {
+                    reject(error);
+                }else {
+                    resolve(result);
+                }
 			});
 		});
 	},
 	createRecord: function(store, type, record) {
-		var token = localStorage.token;
 		url = host;
-		//TODO: Check if token is valid, reject if it is not there.
 
 		var _record;
 
 		return new Promise(function(resolve,reject) {
 
 			if( type.typeKey === 'project' ) {
-					_record = {		        
-						name: record.get('name'),
-						description: record.get('description'),
-						hostname: record.get('hostname'),
-						contentType: record.get('contentType'),
-						projectType: record.get('projectType'),
-                        templates: record.get('templates'),
+					_record = {
+                        project: {
+                            name: record.attr('name'),
+                            description: record.attr('description'),
+                            hostname: record.attr('hostname'),
+                            contentType: record.attr('contentType'),
+                            projectType: record.attr('projectType'),
+                        }
 					};
 					url = url + '/projects';
 			} else if( type.typeKey === 'alp' ) {
-                    console.log(record.get('source'));
                     _record = {
                         alps: {
-                            name: record.get('name'),
-                            description: record.get('description'),
-                            contentType: record.get('contentType'),
-                            source: record.get('source'),
+                            name: record.attr('name'),
+                            description: record.attr('description'),
+                            contentType: record.attr('contentType'),
+                            source: record.attr('source'),
                         }
                     };
                 url = url + '/alps';
 			} else if( type.typeKey === 'resource' ) {			
-				var projectId = record.get('project');
-				if( !record.get('project') ) { reject('A parent project identifier property must be present on records of type \'resource\''); }
+				var projectId = record.attr('project');
+				if( !record.attr('project') ) { reject('A parent project identifier property must be present on records of type \'resource\''); }
 				_record  = {
 					resource:  {
-						name: record.get('name'),
-						description: record.get('description'),
-						responses: record.get('responses'),
-						url: record.get('url'),
-						children: record.get('children'),
-						parent: record.get('parent'),
-						methods: record.get('methods'),
-                        class: record.get('class')
+						name: record.attr('name'),
+						description: record.attr('description'),
+						responses: record.attr('responses'),
+						url: record.attr('url'),
+						children: record.attr('children'),
+						parent: record.attr('parent'),
+						methods: record.attr('methods'),
+                        class: record.attr('class')
 					}
 				};
-                console.log(_record);
 				url = url + '/projects/' + projectId + '/resources';
-			} else if( type.typeKey === 'state' ) {
-                var projectId = record.get('project');
-				if( !record.get('project') ) { reject('A parent project identifier property must be present on records of type \'state\''); }
+			} else if( type.typeKey === 'hypernode' ) {
+                var sketchId = record.attr('sketch');
+				if( !record.attr('sketch') ) { reject('A parent sketch identifier property must be present on records of type \'hypernode\''); }
                 _record = {
-                    state: {
-                        name: record.get('name'),
-                        description: record.get('description'),
-                        responses: record.get('responses'),
-                        transitions: record.get('transitions')
+                    hypernode: {
+                        name: record.attr('name'),
+                        nodeClass : record.attr('nodeClass'),
+                        url: record.attr('url'),
+                        description: record.attr('description'),
+                        contentType: record.attr('contentType'),
+                        headers: record.attr('headers'),
+                        statusCode: record.attr('statusCode'),
+                        reason: record.attr('reason'),
+                        body: record.attr('body'),
+                        transitions: record.attr('transitions'),
+                        method: record.attr('method'),
                     }
                 };
-                url = url + '/projects/' + projectId + '/states';
+                url = url + '/sketches/' + sketchId + '/hypernodes';
+            } else if( type.typeKey === 'nodecollection' ) {
+                var sketchId = record.attr('sketch');
+				if( !record.attr('sketch') ) { reject('A parent sketch identifier property must be present on records of type \'hypernode\''); }
+                _record = {
+                    collection: record.attr('nodes')
+                }
+                url = url + '/sketches/' + sketchId + '/hypernodes/collection';
+
             } else if ( type.typeKey === 'map' ) {
-                var projectId = record.get('project');
-				if( !record.get('project') ) { reject('A parent project identifier property must be present on records of type \'map\''); }
+                var projectId = record.attr('project');
+				if( !record.attr('project') ) { reject('A parent project identifier property must be present on records of type \'map\''); }
                 _record = {
                     map :  {
-                        name: record.get('name'),
-                        description: record.get('description'),
-                        steps: record.get('steps')
+                        name: record.attr('name'),
+                        description: record.attr('description'),
+                        steps: record.attr('steps')
                     }
                 };
                 url = url + '/projects/' + projectId + '/maps';
@@ -269,68 +273,73 @@ export default DS.Adapter.extend({
 				reject('unknown record type');
 			}
 
-			createObject(token, url, _record, function(error, response) {
-				if( !error ) { resolve(response[0]); }
-				else { reject(error); }
+			createObject(url, _record, function(error, response) {
+				if( !error ) { 
+                    resolve(response.result);
+                } else { reject(error); }
 			});
 		});
 
 	},
 	updateRecord: function(store, type, record) {
-		var token = localStorage.token;
 		url = host;
 		var _record;
 
 		return new Promise(function(resolve,reject) {
             if( type.typeKey === 'project' ) {
-                console.log(record);
                 // merge the ALPS and simple vocabularies into a single list of words
                 var wordList = [];
                 _record = {
-                    simpleVocabulary: record.get('simpleVocabulary')
+                    simpleVocabulary: record.attr('simpleVocabulary')
                 }
                 url = url + '/projects/' + record.get('id');
             } else if( type.typeKey === 'resource' ) {
-				var projectId = record.get('project');
+				var projectId = record.attr('project');
 				if( !projectId ) { reject('A parent project identifier property must be present for records of type \'resource\''); }
 				_record  = {
 					resource:  {
-						name: record.get('name'),
-						description: record.get('description'),
-						responses: record.get('responses'),
-						url: record.get('url'),
-						children: record.get('children'),
-						parent: record.get('parent'),
-						methods: record.get('methods'),
-                        class: record.get('class')
+						name: record.attr('name'),
+						description: record.attr('description'),
+						responses: record.attr('responses'),
+						url: record.attr('url'),
+						children: record.attr('children'),
+						parent: record.attr('parent'),
+						methods: record.attr('methods'),
+                        class: record.attr('class')
 					}
 				};
 				url = url + '/projects/' + projectId + '/resources/' + record.get('id');
 				
-			} else if( type.typeKey === 'state' ) {
-                var projectId = record.get('project');
-				if( !projectId ) { reject('A parent project identifier property must be present for records of type \'state\''); }
+			} else if( type.typeKey === 'hypernode' ) {
                 _record = {
-                    state: {
-						name: record.get('name'),
-						description: record.get('description'),
-						responses: record.get('responses'),
-                        transitions: record.get('transitions'),
-                        x: record.get('x'),
-                        y: record.get('y')
+                    hypernode: {
+                        sketch: record.attr('sketch'),
+                        name: record.attr('name'),
+                        nodeClass: record.attr('nodeClass'),
+                        url: record.attr('url'),
+                        description: record.attr('description'),
+                        contentType: record.attr('contentType'),
+                        headers: record.attr('headers'),
+                        statusCode: record.attr('statusCode'),
+                        reason: record.attr('reason'),
+                        body: record.attr('body'),
+                        method: record.attr('method'),
+                        transitions: record.attr('transitions'),
+                        method: record.attr('method'),
+                        x: record.attr('x'),
+                        y: record.attr('y')
                     }
                 };
-
-                url = url + '/projects/' + projectId + '/states/' + record.get('id');
+                url = url + '/hypernodes/' + record.get('id');
             } else if( type.typeKey === 'map' ) {
-				if( !record.get('project') ) { reject('A parent project identifier property must be present on records of type \'map\''); }
-                var projectId = record.get('project');
+				if( !record.attr('project') ) { reject('A parent project identifier property must be present on records of type \'map\''); }
+                var projectId = record.attr('project');
                 var mapId = record.get('id');
                 _record = {
                     map :  {
-                        name: record.get('name'),
-                        description: record.get('description'),
-                        steps: record.get('steps')
+                        name: record.attr('name'),
+                        description: record.attr('description'),
+                        steps: record.attr('steps')
                     }
                 };
                 url = url + '/projects/' + projectId + '/maps/' + mapId;
@@ -338,29 +347,27 @@ export default DS.Adapter.extend({
 				reject('this record type cannot be updated.');
 			}
 
-            console.log(url);
-			updateObject(token ,url, _record, function(error, response) {
+			updateObject(url, _record, function(error, response) {
 				if( !error ) { resolve(response[0]); }
 				else { reject(error); }
 			});
 		});
 	},
 	deleteRecord: function(store, type, record) {
-		var token = localStorage.token;
 		url = host;
 
 		return new Promise(function(resolve,reject) {
 			if( type.typeKey === 'project' ) {
 				url = url + '/projects/' + record.id;
 			} else if( type.typeKey === 'resource' ) {
-				var projectId = record.get('project');
+				var projectId = record.attr('project');
 				if( !projectId ) { reject('A parent project identifier property must be present on records of type \'resource\''); }
 				url = url + '/projects/' + projectId + '/resources/' + record.get('id');
 			} else {
 				reject('unknown record type');
 			}
 
-			deleteObject(token, url, function(error) {
+			deleteObject(url, function(error) {
 				if( !error ) { resolve(); }
 				else { reject(error); }
 			});

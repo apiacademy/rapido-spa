@@ -2,48 +2,62 @@ import DS from "ember-data";
 
 export default DS.JSONSerializer.extend({
 
+/*
 normalize: function(type, hash) {
-    console.log('serializer:normalize');
 
-	var key;
-
-	hash.id = hash._id;
-	for( key in hash ) {
-		if( key === 'created' ) {
-			hash.creationDate = hash.created;
-		} else if( key === 'class' ) {
-            hash.classString = hash.class;
-        }
-	}
+    console.log('*** normalize ***');
+    
 
 	return hash;
 },
+*/
 
-
-	/*extract: function(store, type, payload, id, requestType) {
-    	console.log('extract');
-    	console.log(payload);
-    	console.log(type);
-  	},*/
 extractArray: function(store, primaryType, rawPayload) {  		
-	console.log('serializer:extractArray');      
 
-	var primaryArray = [];
-	var i, payload, key;
+    //console.log('*** extractArray ***');
 
-    for( i = 0; i < rawPayload.length; i++ ) {
-        payload = rawPayload[i];
-        var resource = {};
-        for( key in payload ) {
-            if( key === '_id') { 
-                resource.id = payload._id;
-            }else {
-                resource[key] = payload[key];
-            }
-        }          
-        primaryArray.push(resource);  
+    return rawPayload.result ? rawPayload.result : rawPayload;
+},
+
+extractCreateRecord: function(store, typeClass, payload, id, requestType) {
+
+    //console.log('*** extractCreateRecord ***');
+
+    if( payload.result ) {
+        return payload.result;
     }
-   
-	return primaryArray;
-}
+
+    return this.extractSave(store, typeClass, payload, id, requestType);
+},
+
+extract: function(store, typeClass, payload, id, requestType) {
+    //console.log('*** extract ***');
+    
+    this.extractMeta(store, typeClass, payload);
+
+    if( payload.result ) {
+        return payload.result;
+    }
+
+    var specificExtract = "extract" + requestType.charAt(0).toUpperCase() + requestType.substr(1);
+    return this[specificExtract](store, typeClass, payload, id, requestType);
+},
+
+extractSave: function(store, typeClass, payload, id, requestType) {
+    //console.log('*** extractSave ***');
+    return this.extractSingle(store, typeClass, payload, id, requestType);
+},
+
+extractSingle: function(store, typeClass, payload, id, requestType) {
+    console.log('*** extractSingle ***');
+    var normalizedPayload = this.normalizePayload(payload);
+    if( requestType === 'updateRecord' ) {
+        // Pig-headed ember data insists that an ID should be returned, so just use the original ID
+        return {id: id};
+    }
+    return this.normalize(typeClass, normalizedPayload);
+},
+
+
+
 });

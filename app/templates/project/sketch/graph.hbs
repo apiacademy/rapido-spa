@@ -1,0 +1,33 @@
+<div>
+    <h4>Project Name</h4>
+    <!--
+    <div class="dropdown">
+  <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">
+   Sketch #1 
+    <span class="caret"></span>
+  </button>
+  <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
+    <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Sketch #2</a></li>
+    <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Create New Sketch...</a></li>
+  </ul>
+  </div>
+  <div class="form">
+      <button type="button" class="btn btn-default"  {{action 'newNode'}}><span class="plus-icon"> </span> New Node</button>
+  </div>
+-->
+</div>
+
+<div style="position: absolute; top: 0px; bottom: 0; width: 100%; height: 100%; z-index:-1;">
+    <div id="canvas" style="">{{node-graph nodes=model
+            createTransitionAction='openModal'
+            nodeSelectedAction='nodeSelected' 
+            transitionSelectedAction='transitionSelected'
+            nodeMovedAction='nodeMoved'
+            contentTypes='linkableContentTypes'
+            }}
+    </div>                        
+</div>
+<div class="modal fade" id="transitionModal">
+{{outlet "modal"}}
+</div><!-- /.modal -->
+

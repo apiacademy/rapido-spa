@@ -11,15 +11,13 @@ var links = [];
 var linkedNodes = [];
 var orphanNodes = [];
 var graphSVG = null;
+var originRadius = 10;
         
 var force,idMap = null;
 var path, canvas, zoomContainer;
 var linkedNodesSVG = null;
 
-//var orbitRadius = 100;
-    
 var eventHandler = function(event, callback) {
-    //console.log('Warning: no event handler defined for graph');
     callback('no handler defined');
 }
 
@@ -41,8 +39,6 @@ function dblclick(d) {
 }
 
 function dragstart(d) {
-		console.log('force dragstart');
-		console.log(d);
     d3.event.sourceEvent.stopPropagation();
     d3.select(this).classed("fixed", d.fixed = true);
     dragEnabled = true;
@@ -72,7 +68,6 @@ var orbitalDrag = d3.behavior.drag()
 	.on('dragend', orbitalDragEnd);
 
 function orbitalDragMove(d, i) {
-        console.log('orbitalDragMove');
 	function pointInCircle(x, y, cx, cy, radius) {
 	  var distancesquared = (x - cx) * (x - cx) + (y - cy) * (y - cy);
 	  return distancesquared <= radius * radius;
@@ -84,11 +79,9 @@ function orbitalDragMove(d, i) {
 	/*var orbit = 
 			d3.select(transitionCircle.node().parentNode.parentNode)
 			.select(".node-orbit");*/
-    console.log(transitionCircle.node().parentNode.parentNode);
 	var orbit = 
 			d3.select(transitionCircle.node().parentNode.parentNode)
 			.select(".node-orbit");
-    console.log(orbit);
 	var orbitRadius = orbit.attr('r');
 	
 	if( !pointInCircle(d3.event.x, d3.event.y, 0, 0, orbitRadius ) ) {
@@ -139,7 +132,6 @@ function orbitalDragMove(d, i) {
 		transitionCircle
 			.attr("cx", orbitRadius * Math.cos(theta))
 			.attr("cy", orbitRadius * Math.sin(theta));
-		console.log(orbitalTargetIndex);
 		if( orbitalTargetIndex ) {
 			orbitalTargetIndex.highlight = false;
 			oribtalDragOwner = null;
@@ -154,7 +146,6 @@ function orbitalDragEnd( d ) {
 
     // Check if orbitTarget is now inside another state circle
     // 
-	console.log(orbitTarget);
 	if( orbitTarget ) { 
 		// The source for this transition has changed, update the data model accordingly
 	}
@@ -173,50 +164,43 @@ function calculateRadius(numTransitions) {
 // The main routine - updates/renders the graph visualization.      
 function initGraph(_nodes) {
 
-    if( !_nodes || _nodes.length <= 0 ) { 
-        console.warn('no nodes to render.');
-    } 
-
-    // Create a static root node for the graph
+    // Create a static root node for the graph, this is the root from which all 'home' response nodes are linked.
     var rootNodeArray = [{
-        id: 'root',
-        nodeType: 'root',
+        nodeType: 'origin',
         transitions: [],
         get: function(propName) {
             return this[propName];
         }
     }]
 
-    // Create transitions from the root node
-    //TODO: How do I represent 'home' nodes?
-
+    // Create a list of node objects with the newly created root node as the first item.
     nodes = rootNodeArray.concat(_nodes);
+    
+    // Create a map of nodes with the ID as the key (not including the origin node).  This will be useful later when drawing the links between nodes.
     idMap = {};    
-    
-    // Convert the application dataset into something that we can use with d3
-    
-    // Create a map of node ids so we can easily create transition objects that point to the correct array indices
-    for( var i = 0; i < nodes.length; i++ ) {        
+    for( var i = 1; i < nodes.length; i++ ) {        
         var id = nodes[i].get('id');
         idMap[id] = nodes[i];        
-        nodes[i].nodeType = nodes[i].nodeType === 'root' ? 'root' : 'orphan';
+        // Initially mark all nodes as 'orphan' nodes.  Once we begin identifying relationships we will change this designation.
+        nodes[i].nodeType = 'orphan';
     }
-    
+    // Store the origin node in the map with the key 'root'
+    idMap.root =  nodes[0];
+
+    // Create links between nodes..
+
     links = [];
-    // Create links
-    for( var i = 0; i < nodes.length; i++ ) {
-        var node = nodes[i];
-        var transitions = node.get('transitions');
-                
+
+    // A utility function that stores links between graph nodes.  If a node is found to be the target of a link, its type is changed from
+    // 'orphan' to 'linked'.
+    function createLinks(transitions, sourceNode) {
         for ( var j = 0; j < transitions.length; j++ ) {
             var transition = transitions[j];
-            var sourceNode = idMap[node.get('id')];            
             var targetNode = idMap[transition.target];
             
             if( targetNode === undefined ) {
                 console.log('warning: transition found that targets a non-existent state: ' + transition.target);
             } else {
-                console.log(transition);
                 // Calculate the angle for this transition to be rendered on the state's orbit
                 var _theta = ((360 / transitions.length) * j) * (Math.PI/180);
 
@@ -234,17 +218,33 @@ function initGraph(_nodes) {
                 transition.theta = _theta;
                 transition.source = sourceNode.get('id');
 
-                // Change the nodeTypes of the source and target nodes to indicate that they are no longer orphans
-                sourceNode.nodeType = 'linked';
+                // Change the nodeTypes of the target node to indicate that it is not an orphan
                 targetNode.nodeType = 'linked';
             }
         }        
-    }    
+    }
 
-    console.log(links);
-    console.log(nodes);
+    // Create links for each node in our list (except for the origin node).
+
+    for( var i = 1; i < nodes.length; i++ ) { 
+        var node = nodes[i];
+        createLinks(node.get('transitions'), idMap[node.get('id')]);
+    }
+
+    //TODO: Optimize these routines by doing more work in a single iteration
+  
+    // Create links between the origin node and any remaining 'orphan' nodes.
+    var rootTransitions = [];
+    for( var i = 1; i < nodes.length; i++ ) {
+        var node = nodes[i];
+        if( node.nodeType == 'orphan' ) { 
+            rootTransitions.push({name: '', methods: ['GET'], target: node.get('id')});
+        }
+    }
+    createLinks(rootTransitions, idMap['root']);
+
     
-    
+
     // Initialize the D3 objects with the nodes and links objects
     canvasWidth = $('#canvas').width();        
 
@@ -291,9 +291,14 @@ function canvas_dragstarted(d) {
             targetPadding = d.right ? 17 : 12,
             targetX = d.target.x - (targetPadding * normX),
             targetY = d.target.y - (targetPadding * normY);
-            
-            sourceX = d.source.x + calculateRadius(d.numTransitions) * Math.cos(d.theta);
-            sourceY = d.source.y + calculateRadius(d.numTransitions) * Math.sin(d.theta);
+           
+            if( d.source.nodeType != 'origin' ) { 
+                sourceX = d.source.x + calculateRadius(d.numTransitions) * Math.cos(d.theta);
+                sourceY = d.source.y + calculateRadius(d.numTransitions) * Math.sin(d.theta);
+            } else {
+                sourceX = d.source.x + originRadius * Math.cos(d.theta);
+                sourceY = d.source.y + originRadius * Math.sin(d.theta);
+            }
 
             return 'M' + sourceX + ',' + sourceY + 'L' + targetX + ',' + targetY;
         });    
@@ -333,7 +338,6 @@ Defines events, SVG objects and renders the D3 layout.  Call this function whene
 **/    
 function update() {        
     
-    //console.log('update');
     
     var selectedSVG = null;
     var dragEnabled = false;
@@ -354,7 +358,6 @@ function update() {
         // turn off any selections on links or nodes
         path.classed({'incoming': false, 'outgoing': false});
 		d3.selectAll('.node-popup-group').attr('visibility', 'hidden');
-
 		
         var selectEvent = {
             'type' : 'stateSelected',
@@ -390,6 +393,8 @@ function update() {
             return;
         }
 
+        // If this is a root node, render the root node popup
+
 		// Render a popup window
 		var popupId = '#node-popup-group' + i;
 		d3.selectAll('.node-popup-group').attr('visibility', 'hidden');
@@ -422,32 +427,36 @@ function update() {
     linkedNodesSVG
 		.append('svg:circle')
         .attr('class', function(d,i) {
-            if( d.nodeType === 'root' ) { return 'node-root'; }
+            if( d.nodeType === 'origin' ) { return 'node-root'; }
             else { return 'node-orbit'; }
         })
 		.attr('r', function(d,i) { 
-            if( d.nodeType === 'root' ) {
-                return 10;
+            if( d.nodeType === 'origin' ) {
+                return originRadius;
             }else {
                 return calculateRadius(d.get('transitions').length);
             }
         })
 		.attr('stroke', 'black')
 		//.attr('fill', 'url(#diagonalHatch)');
-		.attr('fill', 'white');
+		.attr('fill', 'white')
+        .classed('selected', function(d,i) { return d.highlight; } )
+        .on('click', function(d,i) {
+            d3.event.stopPropagation();
+            //TODO: change colour of this state to show that it has been selected.
+            // Commenting this out because I haven't figured out how to 'de-select' nodes
+            //d3.select(this).classed('selected', true);
 
-/*	
-    linkedNodesSVG
-			.append('svg:circle')
-            .attr('class', 'node-orbit')
-			.classed('selected', function(d,i) { return d.highlight; } )
-            .attr('r',function(d,i) { return calculateRadius(d.get('transitions').length); })
-            .on('click', function(d,i) {
-                d3.event.stopPropagation();
-                //TODO: change colour of this state to show that it has been selected.
-                // COmmenting this out because I haven't figured out how to 'de-select' nodes
-                //d3.select(this).classed('selected', true);
-
+            if( d.nodeType === 'origin' ) {
+                // Present the user with a menu to create a new node.
+                // The type of node menu we present will depend on the default content type for this project.
+                // Fire an event and let the controller take over.
+                var selectEvent = {
+                    'type' : 'newTransition',
+                    'data' : { 'sourceId' : 'root' }
+                };
+                eventHandler(selectEvent, function(){}); 
+            }else {
                 path.classed({
                     'outgoing': function(pathData,i) { 
                         if( pathData.source === d ) { return true; }
@@ -456,8 +465,9 @@ function update() {
                         if( pathData.target === d ) { return true; }
                     }
                 });
-            });
-            */
+            }
+
+        });
 
     // Transition circle and label.  Draw an orbital for each transition emanating from this node.
     // The path will be drawn in the tick function from the same theta.
@@ -528,10 +538,10 @@ function update() {
     linkedNodesSVG
             .append("text")
             .attr("x", 0)
-            .attr("y", 8 )
+            .attr("y", function(d) { if( d.nodeType === 'origin' ) { return 20; }  return 8; } )
 			.attr("text-anchor", "middle")
-			.attr("class", "node-title-text")
-            .text(function( d ) { return d.get('name'); });    
+			.attr("class", function(d) { if( d.nodeType === 'origin' ) { return "origin-title-text"; } return  "node-title-text"; } )
+            .text(function( d ) { if( d.nodeType === 'origin' ) { return 'origin';  }  return d.get('name'); });    
 
     
 
@@ -605,101 +615,6 @@ function update() {
     force.start();
 }
     
-//TODO: I can optimize this by maintaining a hash object in addition to an array
-function parseNodesList() {
-    var orphanMap = {};
-    var linkedMap = {};
-    
-    for( var i =0; i < orphanNodes.length; i++ ) {
-        var orphan = orphanNodes[i];
-        orphanMap[orphan.id] = i;        
-    }
-    
-    for( var i = 0; i < linkedNodes.length; i++ ) {
-        var linkedNode = linkedNodes[i];
-        linkedMap[linkedNode.id] = i;
-    }
-    
-    // scenario 1: New Orphan
-    // orphanNodes.push
-    
-    // scenario 2: Deleted Orphan
-    // find orphan node and remove
-    
-    // scenario 3: Link with no more transitions
-    // find linked node and remove, orphanNodes.push
-    
-    // scenario 4: Orphan with new transition
-    // find orphan node and remove, linkedNodes.push
-}
-/**
-Insert a new orphan node into an existing graph
-**/
-function pushNode(node) {
-    // Path uses the links array which holds pointers to objects stored in the orphans and linked lists
-    // We are going to create a new orphan, but none of the d3 objects are bound to the nodes list.
-    
-    //console.log('pushNode');
-    node.nodeType = 'orphan';
-    // Store this resource in our general nodes list so we can find it later if we need to delete it
-    nodes.push(node);
-    // Store the resource in the orphan list for immediate rendering.
-    //console.log(node);
-    orphanNodes.push(node);
-    update();
-}
-    
-function deleteNodes(startIdx, count) {
-    //TODO: support multiple node removal    
-    //console.log('deleteNodes');
-    var node = nodes[startIdx];
-    //console.log(node);
-    
-    if( node.nodeType === 'orphan' ) {
-        var orphanIndex = 0;
-        for( orphanIndex = 0; orphanIndex < orphanNodes.length; orphanIndex++ ) {
-            var orphanNode = orphanNodes[orphanIndex];
-            if( orphanNode.nodeId === node.nodeId ) {
-                //console.log('found it');
-                break;
-            }
-        }
-        orphanNodes.splice(orphanIndex, 1);
-    }else {
-        // Remove this node and remove the transitions
-        
-        var linkedIndex = 0;
-        for( linkedIndex = 0; linkedIndex < linkedNodes.length; linkedIndex++ ) {
-            var linkedNode = linkedNodes[linkedIndex];
-            if( linkedNode.nodeId === node.nodeId) {
-                //console.log('found it');
-                //console.log(linkedNode);
-                //TODO remove all associated paths/links
-                break;
-            }
-        }
-        
-        linkedNodes.splice(linkedIndex, 1);
-                
-        //console.log(links);
-        for( var i = 0; i < links.length; i++ ) {
-            var link = links[i];            
-            if( link.source.nodeId === node.nodeId ) { 
-                // remove this path
-                links.splice(i, 1);
-            } else if( link.target.nodeId === node.nodeId ) {
-                // remove this path
-                links.splice(i, 1);
-            }
-        }
-        //console.log(links);
-    }
-        
-    // remove the resource form the general nodes list
-    nodes.splice(startIdx, count);
-    update();
-}
-
 function setZoom(scale) {
     zoom.translate([0,0]).scale(scale);
     zoom.event(graphSVG.transition().duration(50));
@@ -721,12 +636,6 @@ function setZoom(scale) {
             graphSVG = svg;
             initGraph(nodeList);
             
-        },
-        pushStateNode: function(stateNode) {
-            pushNode(stateNode);
-        },
-        removeStateNodes: function(start, count) {
-            deleteNodes(start, count);
         },
         setZoom: function(scale) {
             setZoom(scale);
