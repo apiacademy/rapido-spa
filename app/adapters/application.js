@@ -164,9 +164,8 @@ export default DS.Adapter.extend({
         } else if( type.typeKey === 'alp') {
 			var projectId = query.project;
 			url = url + '/alps?projectId='+projectId;
-        } else if( type.typeKey === 'resource') {
-			var projectId = query.project;
-			url = url + '/projects/' + projectId + '/resources';
+        } else if( type.typeKey === 'crudnode') {
+            url = url + '/sketches/' + query.sketch + '/crudnodes';
 		} else if ( type.typeKey === 'hypernode' ) {
             url = url + '/sketches/' + query.sketch + '/hypernodes';
 		} else if ( type.typeKey === 'map' ) { 
@@ -182,7 +181,8 @@ export default DS.Adapter.extend({
                 if( error ) {
                     reject(error);
                 }else {
-                    resolve(result);
+                    console.log(result);
+                    resolve(result.result);
                 }
 			});
 		});
@@ -202,9 +202,19 @@ export default DS.Adapter.extend({
                             hostname: record.attr('hostname'),
                             contentType: record.attr('contentType'),
                             projectType: record.attr('projectType'),
+                            activeSketch: record.attr('activeSketch')
                         }
 					};
 					url = url + '/projects';
+			} else if( type.typeKey === 'sketch' ) {
+                var _record = { sketch: {}};
+				var projectId = record.attr('project');
+				if( !record.attr('project') ) { reject('A parent project identifier property must be present on records of type \'sketch\''); }
+
+                record.eachAttribute(function(attrName, meta) {
+                    _record.sketch[attrName] = record.attr(attrName);
+                });
+				url = url + '/projects/' + projectId + '/sketches';
 			} else if( type.typeKey === 'alp' ) {
                     _record = {
                         alps: {
@@ -215,25 +225,21 @@ export default DS.Adapter.extend({
                         }
                     };
                 url = url + '/alps';
-			} else if( type.typeKey === 'resource' ) {			
-				var projectId = record.attr('project');
-				if( !record.attr('project') ) { reject('A parent project identifier property must be present on records of type \'resource\''); }
-				_record  = {
-					resource:  {
-						name: record.attr('name'),
-						description: record.attr('description'),
-						responses: record.attr('responses'),
-						url: record.attr('url'),
-						children: record.attr('children'),
-						parent: record.attr('parent'),
-						methods: record.attr('methods'),
-                        class: record.attr('class')
-					}
-				};
-				url = url + '/projects/' + projectId + '/resources';
+			} else if( type.typeKey === 'crudnode' ) {			
+                var sketchId = record.attr('sketch');
+				if( !record.attr('sketch') ) { reject('A sketch identifier property must be present on records of type \'crudnode\''); }
+                
+                var _record = { crudnode: {}};
+                
+                record.eachAttribute(function(attrName, meta) {
+                    _record.crudnode[attrName] = record.attr(attrName);
+                });
+                
+                url = url + '/sketches/' + sketchId + '/crudnodes';
+
 			} else if( type.typeKey === 'hypernode' ) {
                 var sketchId = record.attr('sketch');
-				if( !record.attr('sketch') ) { reject('A parent sketch identifier property must be present on records of type \'hypernode\''); }
+				if( !record.attr('sketch') ) { reject('A sketch identifier property must be present on records of type \'hypernode\''); }
                 _record = {
                     hypernode: {
                         name: record.attr('name'),
@@ -287,11 +293,13 @@ export default DS.Adapter.extend({
 
 		return new Promise(function(resolve,reject) {
             if( type.typeKey === 'project' ) {
-                // merge the ALPS and simple vocabularies into a single list of words
-                var wordList = [];
-                _record = {
-                    simpleVocabulary: record.attr('simpleVocabulary')
-                }
+                var _record = {};
+
+                record.eachAttribute(function(attrName, meta) {
+                    _record[attrName] = record.attr(attrName);
+
+                });
+
                 url = url + '/projects/' + record.get('id');
             } else if( type.typeKey === 'resource' ) {
 				var projectId = record.attr('project');
@@ -348,7 +356,14 @@ export default DS.Adapter.extend({
 			}
 
 			updateObject(url, _record, function(error, response) {
-				if( !error ) { resolve(response[0]); }
+				if( !error ) { 
+                    if( response ) {
+                    resolve(response[0]); 
+                    }
+                    // Force a reload of the model in the Ember data store to reflect the updated version of the data
+
+
+                }
 				else { reject(error); }
 			});
 		});
