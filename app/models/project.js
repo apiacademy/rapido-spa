@@ -10,7 +10,8 @@ var Project = DS.Model.extend({
     projectType: DS.attr('string'),
     creationDate: DS.attr('string'),
     simpleVocabulary: DS.attr(),
-    alps: DS.attr()
+    alps: DS.attr(),
+    sketchThumbnails: DS.attr()
 });
   
 export default Project;

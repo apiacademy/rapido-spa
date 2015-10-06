@@ -35,6 +35,7 @@ export default Ember.Component.extend({
 		
 		var graphSVG = d3.select('#canvas')
             .append("svg")
+            .attr("id", "canvas")
             .attr("width", $('#canvas').width())            
             .attr("height", $( window ).height());
 					

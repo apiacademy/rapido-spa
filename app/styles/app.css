@@ -2,6 +2,20 @@ html, body {
   margin: 20px;
 }
 
+/* Sketch Styles */
+.sketch.infobox {
+    position: absolute;
+    padding: .5em;
+    border-style: solid;
+    background-color: white;
+    border-color: #8A8A8A;
+    width: 15em;
+}
+
+.sketch h4 {
+	font-family: 'Cabin Sketch', cursive;
+}
+
 /* Graph Styles */
 .graph.node {
     fill: white;
@@ -33,7 +47,116 @@ html, body {
 .tree.node {
 }
 
-.tree.link {
+.node-uri { 
+    stroke-width: 2;
+    stroke: black;
+    fill: #FFFFFF;      
+    fill-opacity: 1.0;
+    cursor: pointer;
 }
+
+
+.tree-node {
+  font: 10px sans-serif;
+}
+.tree-link {
+  fill: none;
+  stroke: #ccc;
+  stroke-width: 3.5px;
+}
+
+
+.tree-node-name {
+    fill: #FAECC3;
+    stroke: black;
+    stroke-width: 2;
+}
+
+.tree-node-name-text {
+    fill: black;
+    stroke: black;
+	font: 18px sans-serif;
+}
+
+.tree-node-method { 
+    stroke-width: 2;
+    stroke: black;
+    fill-opacity: 0.8;
+}
+
+.tree-node-method-text {     
+	stroke-width: 1;
+	fill: white;
+    font: 10px sans-serif;
+}
+
+.tree-node circle {
+  fill: #fff;
+  stroke: #6F198C;
+  stroke-width: 3.0px;
+}
+
+#small-circle {
+  stroke-width: 1.0px;
+  fill-opacity: 0.4;
+  fill: gray;
+	stroke: gray;
+}
+
+.GET {
+	fill: #0A52A8;      	
+}
+.PUT { 
+    fill: #B97417;          
+}
+.POST {
+	fill: #109A36;
+}
+.DELETE {
+	fill: #930C16;
+}
+
+
+
+
+/* Vocabulary Styles */
+#vocab-list {
+	margin: 0 0 0.5em 1.0em;
+	padding: 1.0em 0 0 0;
+	list-style: none;
+}
+
+#vocab-list li {
+	position: relative;
+	font-size: 22px;
+	border-bottom: 1px dotted #ccc;
+}
+
+#new-vocab {
+	position: relative;
+	margin: 0 0 0.5em 0;
+	width: 20.0em;
+	font-size: 24px;
+	font-family: inherit;
+	line-height: 1.4em;
+	border: 0;
+	outline: none;
+	color: inherit;
+	padding: 6px;
+	
+	border: 1px solid #999;
+	box-shadow: inset 0 -1px 5px 0 rgba(0, 0, 0, 0.2);
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-ms-box-sizing: border-box;
+	-o-box-sizing: border-box;
+	box-sizing: border-box;
+	-webkit-font-smoothing: antialiased;
+	-moz-font-smoothing: antialiased;
+	-ms-font-smoothing: antialiased;
+	-o-font-smoothing: antialiased;
+	font-smoothing: antialiased;
+}
+
 
 

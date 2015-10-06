@@ -10,8 +10,10 @@ Router.map(function() {
     this.route('projects', function() {} );
 
     this.route('project', { path: '/:project_id' }, function() {
+        this.route('export', { path: '/export' } );
         this.route('vocabulary', { path: '/vocab' } );
         this.route('sketch', { path: '/sketches/:sketch_id' }, function() {
+            this.route('export', { path: '/export' } );
             //TODO: Nest the graph route inside hypernodes
             this.route('hypernodes', { path: '/nodes' }, function() {
                 this.route('hypernode', { path: '/:node_id' } );
@@ -22,10 +24,10 @@ Router.map(function() {
                     this.route('create-link', { path: '/create-link' } );
                 });
             });
+            this.route('tree', { path: '/tree' } );
         });
 
         this.route('sketches', { path: '/sketches' } );
-        this.route('export', { path: '/export' } );
 
         this.route('alps', { path: '/alps' }, function() {
         });

@@ -1,7 +1,7 @@
 var simpleGraph = (function() {
 
     // Force graph variables
-    var nodes, links;
+    var nodes, links, idMap;
     var graphSVG;
     var force;
 
@@ -47,14 +47,35 @@ var simpleGraph = (function() {
 
         function dragstart(d) {
             d3.event.sourceEvent.stopPropagation();
-            d3.select(this).classed("fixed", d.fixed = true);
+
+            // If this node has children, remove the fixed property so they are dragged along with the parent node.
+            function unFreeze(node){
+                node.fixed = false;
+                for( var i = 0; i < node.get('transitions').length; i++ ) {
+                    var childNode = idMap[node.get('transitions')[i].target];
+                    unFreeze(childNode);
+                }
+            }
+            unFreeze(d);
+            d.fixed = true;
+
             dragEnabled = true;
         }
 
         function dragend(d) {
             dragEnabled = false;
-            // Notify the Ember controller that a node position has moved.  Hopefully the new position data will be saved to the server.
-            eventHandler({ type: 'nodeMoved', data: { node: d } }, function(){});                
+            freeze(d);
+            function freeze(node) {
+                // Notify the Ember controller that a node position has moved.  Hopefully the new position data will be saved to the server.
+                eventHandler({ type: 'nodeMoved', data: { node: d } }, function(){});                
+                d3.select(this).classed("fixed", d.fixed = true);
+                node.fixed = true;
+                for( var i = 0; i < node.get('transitions').length; i++ ) {
+                    var childNode = idMap[node.get('transitions')[i].target];
+                    freeze(childNode);
+                }
+            }
+
         }
 
         // Setup zoom and panning container.  All SVG objects should be appended to this container.
@@ -70,7 +91,7 @@ var simpleGraph = (function() {
      */
     function parseNodeList(nodeList) {
 
-        var idMap = {};
+        idMap = {};
 
         // Create a static root node for the graph, this is the root from which all 'home' response nodes are linked.
         var originNode = {
@@ -170,7 +191,7 @@ var simpleGraph = (function() {
         node
             .enter().append("g")
             .attr("id", "node")
-            //TODO: fade button in and out
+            //TODO: fade buttons in and out
             //.on('mouseenter', nodeMouseEnter )
             //.on('mouseleave', function() { console.log('out') } )
             .call(force.drag);

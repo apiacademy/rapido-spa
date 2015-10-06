@@ -14,7 +14,7 @@ normalize: function(type, hash) {
 
 extractArray: function(store, primaryType, rawPayload) {  		
 
-    //console.log('*** extractArray ***');
+    console.log('*** extractArray ***');
 
     return rawPayload.result ? rawPayload.result : rawPayload;
 },
@@ -31,7 +31,7 @@ extractCreateRecord: function(store, typeClass, payload, id, requestType) {
 },
 
 extract: function(store, typeClass, payload, id, requestType) {
-    //console.log('*** extract ***');
+    console.log('*** extract ***');
     
     this.extractMeta(store, typeClass, payload);
 

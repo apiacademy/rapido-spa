@@ -24,13 +24,11 @@ export default Ember.ArrayController.extend({
 });
 
 function updateVocabulary(project, vocabulary) {
-    console.log(vocabulary);
 	var simpleVocabulary = [];
 	for( var i = 0; i < vocabulary.length; i++ ) {
 		simpleVocabulary.push(vocabulary[i].value);
 	}
 
     project.set('simpleVocabulary', simpleVocabulary);
-    console.log(project);
     project.save();
 }

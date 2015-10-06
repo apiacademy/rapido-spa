@@ -1,5 +1,66 @@
-<div>
-    <h4>Project Name</h4>
+
+<!--
+<div class="navbar-btn " >
+    <div class="col-md-1 pull-left">&lt;</div>
+    <div class="col-md-10 text-center">
+    {{#each sketchList as |sketch|}}
+    <span><button class="btn btn-default">{{sketch.label}}</button></span>
+    {{/each}}
+    <button class="btn btn-success">+</button>
+    </div>
+    <div class="col-md-1 pull-right">></div>
+</div>
+-->
+
+<div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+  <div class="panel panel-default">
+    <div class="panel-heading" role="tab" id="headingOne">
+      <h4 class="panel-title">
+        <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+            toggle
+        </a>
+       <div class="col-md-1">
+      <button type="button" class="btn btn-default small"  {{action 'newSketch'}}><span class="plus-icon"> </span> New Sketch</button>
+      <div class="form col-md-1">
+        		{{view "select" 
+					class="form-control" 
+                    content=sketchList
+                    optionValuePath="content.id"
+                    optionLabelPath="content.label"
+                    value=selectedSketch.id
+                    }}
+        </div>
+  </div>
+
+      </h4>
+    </div>
+    <div id="collapseOne" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
+      <div class="panel-body">
+                <div style="border:1 1 1 1">
+            <svg style="height:100;width:200"><g transform="scale(0.3)">{{{thumbnail}}}</g></svg>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div style="width: 100%; height: 100%; z-index:-1;">
+    <!--
+<div class="sketch infobox">
+  <h4>{{projectName}}</h4>
+  <div class="form">
+        		{{view "select" 
+					class="form-control" 
+                    content=sketchList
+                    optionValuePath="content.id"
+                    optionLabelPath="content.label"
+                    value=selectedSketch.id
+                    }}
+      <button type="button" class="btn btn-default small"  {{action 'newSketch'}}><span class="plus-icon"> </span> New Sketch</button>
+  </div>
+</div>
+-->
+
     <!--
     <div class="dropdown">
   <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">
@@ -15,9 +76,8 @@
       <button type="button" class="btn btn-default"  {{action 'newNode'}}><span class="plus-icon"> </span> New Node</button>
   </div>
 -->
-</div>
 
-<div style="position: absolute; top: 0px; bottom: 0; width: 100%; height: 100%; z-index:-1;">
+<!--<div style="position: absolute; top: 0px; bottom: 0; width: 100%; height: 100%; z-index:-1;">-->
     <div id="canvas" style="">{{node-graph nodes=model
             createTransitionAction='openModal'
             nodeSelectedAction='nodeSelected' 

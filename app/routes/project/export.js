@@ -1,16 +1,13 @@
 import Ember from "ember";
 
+// Transition to the relevant sketch.export based on the last working sketch.
 export default Ember.Route.extend({
     model: function() {
-        var project = this.modelFor('project');
+		var project = this.modelFor('project');
 
-        // Get the active or last sketch
+        // Get the last sketch that was being used or the first sketch
+        this.transitionTo('project.sketch.export', project.get('activeSketch'));
+	}
 
-        // Load the appropriate resources (hypernodes or resources) depending on the type of project
-        if( project.get('projectType') === 'hypermedia' ) {
-            return this.store.find('state', {project: project.id});
-        }else {
-            return this.store.find('resource', {project: project.id});
-        }
-    }
+    
 });

@@ -18,6 +18,7 @@
     "typeahead.js": "0.10.5",
     "ace-builds": "*",
     "ember-simple-auth": "0.7.2",
-    "bootstrap": "3.*"
+    "bootstrap": "3.*",
+    "file-saver.js": "~1.20150507.2"
   }
 }

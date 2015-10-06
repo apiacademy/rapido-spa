@@ -5,17 +5,53 @@ export default Ember.ArrayController.extend({
     sketchController: Ember.computed.alias('controllers.project/sketch'),
     projectController: Ember.computed.alias('controllers.project'),
 
+    thumbnail: '',
     linkableContentTypes: ['application/vnd.collection+json'],
+    projectName: function() {
+        return this.get('projectController').model.get('name');
+    }.property('projectController'),
+       selectedSketch: {id: 14},
+    sketchList: [],
+    retrieveSketchList: function() {
+        var controller = this;
+        var projectId = this.get('projectController').model.get('id');
+        this.store.find('sketch', {project: projectId}).then(function(sketches) {
+            var sketchList = [];
+            for( var i = 0; i < sketches.content.length; i++ ) {
+                var label = 'Sketch #' + (i+1);
+                sketchList.push({label: label, id: sketches.content[i].id});
+            }
+            controller.set('sketchList', sketchList );
+            controller.set('selectedSketch', {id: controller.get('sketchController').model.get('id')});
+            var thisSketchID = controller.get('sketchController').model.get('id');
+            var selectedSketch = controller.get('selectedSketch');
+        });
+    }.observes('sketchController').on('init'),
 
-    transitionCreationActions: function() {
-        // the list of availabile modal flows for a create link activitiy based on the media type 
-        return [{'description': 'add item', 'icon': 'blah'}]
-    }.property(),
+    sketchSelected: function() {
+        var thisSketchId = this.get('sketchController').model.get('id');
+        var sketchId = this.get('selectedSketch').id;
+        if( sketchId != thisSketchId ) {
+            var projectId = this.get('projectController').model.get('id');
+            console.log('transitioning to selected sketch');
+            this.transitionToRoute('project.sketch.graph', projectId, sketchId);
+        }
+    }.observes('selectedSketch.id'),
+
     actions: {
+        newSketch: function() {
+            // Add new sketch
+            var sketch = this.store.createRecord('sketch', {
+                project: this.get('projectController').model.id, 
+                name: 'auto generated'
+            });
+            sketch.save();
+
+            // Transition to the new sketch
+        },
         nodeSelected: function(id) {
-            console.log('nodeSelected');
-            console.log(id);
             if( !id ) {
+                //TODO: Implement
                 // The user probably clicked on the canvas.  Treat this as a cancel or unselect and send them to the collection
                 //this.transitionToRoute('states');
             }else { 
@@ -29,6 +65,16 @@ export default Ember.ArrayController.extend({
            node.set('x', node.x);
            node.set('y', node.y);
            node.save();
+
+           this.set('thumbnail', $('#svg-canvas').html());
+           var project = this.get('projectController').model;
+
+           // Save the html thumbnail in the project
+           var thumbs = project.get('sketchThumbnails');
+           if( !thumbs ) { thumbs = []; }
+           
+           
+
        }
     }
 });

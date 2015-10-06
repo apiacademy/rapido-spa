@@ -1,0 +1,31 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "$ref": "#/definitions/resourceObject",
+    "additionalProperties": true,
+      
+    "definitions": {
+      "resourceObject": {
+        "type": "object",
+        "properties": {
+           "_links": { "$ref": "#/definitions/_links" },
+           "_embedded": { "$ref": "#/definitions/_embedded" } 
+        },
+      },
+        
+      "_links": { "type": "object",
+        	"additionalProperties" :{ "type":"object",
+              "required": ["href"]                                    
+            }
+      },
+        
+	  "_embedded": { "type": "object", 
+             	"additionalProperties": {
+                  "oneOf": [
+                    { "type" : "object" },
+                    { "type" : "array" }
+                   ]
+                }
+      }
+   }
+}
+ 

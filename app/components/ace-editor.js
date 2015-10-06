@@ -37,6 +37,7 @@ export default Ember.Component.extend({
     // Get vocabulary lists
     var nodeList = this.get('nodeList');
     if( !nodeList ) { nodeList = []; }
+    console.log(typeAheadSuggestions);
     if( !typeAheadSuggestions ) { typeAheadSuggestions = []; }
 
     var simpleVocabCompleter = {

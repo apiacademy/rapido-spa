@@ -1,0 +1,108 @@
+<div class="modal-dialog">
+    <div class="modal-content panel">
+      <div class="modal-header panel-heading">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        {{#if wizard_root}}
+        <h4 class="modal-title">Create a New HAL Home Node</h4>
+        {{else}}
+        <h2>{{nodeName}}</h2>
+        <h5>{{wizardTitle}}</h5>
+        {{/if}}
+      </div>
+
+{{#if wizard_root}}
+<div class="modal-body">
+    <div class="form-group">
+        <label>Name: </label>
+        {{twitter-typeahead data=words type='text' class='form-control' placeholder='What is the name of your new node?' value=newNodeName}}
+    </div>
+    <div class="form-group">
+        <label>Content-Type: </label>
+        {{twitter-typeahead data=contentTypes type='text' class='form-control' placeholder='What ?' value=newNodeContentType}}
+    </div>
+    {{#if knownContentType}}
+    <div class="alert alert-info" role="alert">{{knownContentTypeHelp}}</div>
+    {{/if}}
+    <div class="form-group">
+        <label style="color:#959595">URI: </label>
+        <input class="form-control" readonly type="text" placeholder="URI is generated based on the name attribute" value={{newNodeURI}}>
+    </div>
+</div>
+<div class="modal-footer">
+    <div class="form-group">
+        <button type="button" class="btn btn-primary" {{action 'createNewNode'}}>Create</button>
+    </div>
+ </div>
+{{/if}}
+
+{{#if wizard_start}}
+<div class="modal-body">
+    <p>What kind of HAL link are you trying to create?</p>
+</div>
+<div class="modal-footer">
+    <div class="form-group">
+        <button type="button" class="btn btn-primary" {{action 'createLink'}}>Add a Link</button>
+    </div>
+ </div>
+{{/if}}
+
+{{#if wizard_createLink }}
+<div class="modal-body">
+  <div class="form-group">
+      <label>Name:</label>
+      {{twitter-typeahead data=nodeNames class="form-control" placeholder="name of the response node" value=link_nodename}}
+  </div>
+  <div class="help-block">Use the syntax <b>$(<i>name</i>)</b> to point to an node in this sketch.</div>
+  <div {{bind-attr class=":form-group link_url_class"}}>
+      <label>href:</label>
+      <form class="form-inline">
+          {{link_prefix}} {{input class="form-control" placeholder="target url" value=link_suffix}}
+      </form>
+      <label>{{link_url}}</label>
+  </div>
+  <!--
+  <div class="alert alert-danger" role="alert">{{link_url}} does not point to a node in this sketch.</div> 
+  -->
+  <div {{bind-attr class=":form-group link_rel_class"}}>
+      <label>rel</label>
+      {{input class="form-control" placeholder="rel" value=link_rel}}
+  </div>
+  <!--
+  <div class="form-group">
+      <label>name</label>
+      {{input class="form-control" placeholder="name" value=link_name}}
+  </div>
+  <div class="form-group">
+      <label>title</label>
+      {{input class="form-control" placeholder="title" value=link_title}}
+  </div>
+  -->
+  <div class="form-group">
+      <button type="button" class="btn btn-default btn-xs">
+          <span class="glyphicon glyphicon-align-left" aria-hidden="true"></span>
+      </button>
+      {{#if annotate_toggle}}
+      <div>
+      {{textarea class="form-control" placeholder="a description for this node" value=link_description}}
+      </div>
+      {{/if}}
+  </div>
+  <!--
+  <div class="form-group">
+      <label>{{input type="checkbox" name="blah" checked=link_templated}}
+      templated</label>
+      {{#if link_templated}}
+          {{input class="form-control" placeholder="title" value=link_templated}}
+      {{/if}}
+  </div>
+  -->
+</div>
+<div class="modal-footer">
+    <div class="form-group">
+        <button type="button" class="btn btn-primary" {{bind-attr disabled=isLinkBad}} {{action 'createLink_finish'}}>Create</button>
+    </div>
+</div>
+    {{/if}}
+
+</div><!-- /.modal-content -->
+</div><!-- /.modal-dialog -->

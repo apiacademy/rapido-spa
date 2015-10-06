@@ -35,18 +35,39 @@ export default Ember.Controller.extend( {
         // Build a typeahead suggestion list for the editor
         var suggestionList = [];
         
-        suggestionList.push(this.get('projectController').model.get('alps'));
-       
-        console.log(suggestionList); 
+        //suggestionList.push(this.get('projectController').model.get('alps'));
+        
+        var projectVocabList = { meta: 'vocabulary', words: []};
+        var projectVocabulary = this.get('projectController').model.get('simpleVocabulary');
+        for( var i = 0; i < projectVocabulary.length; i++ ) {
+            projectVocabList.words.push(projectVocabulary[i]);
+        }
+        suggestionList.push(projectVocabList);
+        
+        //TODO Generecize this so it works with any content type 
+        if( this.get('projectController').model.get('contentType') === CollectionJSON.contentType ) {
+            var CJVocabList = { meta: CollectionJSON.name, words: []};
+            for( var i = 0; i < CollectionJSON.keywords.length; i++ ) {
+                CJVocabList.words.push(CollectionJSON.keywords[i]);
+            }
+            suggestionList.push(CJVocabList);
+        }
+
         return suggestionList; 
     }.property('controller.project.sketch.model'),
 
-       actions: {
-           responseUpdated: function(newValue) {
-           },
+    actions: {
+       responseUpdated: function(newValue) {
+           this.set('dirtyResponse', newValue);
+           this.set('isDirty', true);
+       },
        cancel: function() {
        },
        save: function() {
+           //TODO: Parse the body and update hyperlinks
+           var hyperNode = this.get('model');
+           hyperNode.set('body', this.get('dirtyResponse'));
+           hyperNode.save();
        },
        delete: function() {
            // Build a list of child nodes that will be impacted by this deletion
